@@ -1,5 +1,6 @@
 package lastfm
 
+import play.api._
 import play.api.libs.ws._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -31,8 +32,7 @@ trait LastfmMethod {
       if (list.isEmpty) {
         response.map { result =>
           collection.insert(result.json).map(lastError =>
-            // TODO: Log this error
-            Json.obj("error" -> lastError.toString))
+            Logger.error("Error saving LastFM Response to database", lastError))
 
           result.json
         }
