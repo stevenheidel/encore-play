@@ -9,13 +9,10 @@ import reactivemongo.api._
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
 
-import scala.concurrent.Future
-import scala.util.{Success, Failure}
-
-import lastfm.LastfmMethod
 import lastfm.UrlBuilder
+import utils.ExternalApiCache
 
-object Events extends Controller with MongoController with LastfmMethod {
+object Events extends Controller with MongoController with ExternalApiCache {
 
   def collection = db.collection[JSONCollection]("single_events")
 
@@ -26,10 +23,8 @@ object Events extends Controller with MongoController with LastfmMethod {
     val searchParameters = Json.obj("event.id" -> id.toString)
     val indexParameters = JsNull
 
-    execute(path, searchParameters, indexParameters) match {
-      case Success(json) => json.map(Ok(_))
-      case Failure(exception) => Future(InternalServerError(exception.toString))
-    }
+    val response = new ExternalApiCall(path, searchParameters, indexParameters)
+    response.get().map(Ok(_))
   }
 
 }
