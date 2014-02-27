@@ -6,12 +6,12 @@ import org.specs2.mutable._
 import org.specs2.runner._
 import org.junit.runner._
 
-import lastfm.models.LastfmEvent
+import lastfm.models._
 
 @RunWith(classOf[JUnitRunner])
 class LastfmEventSpec extends Specification {
 
-  "LastfmEvent" should {
+  "LastfmEvent.apply()" should {
 
     "create a valid event from Lastfm" in {
       LastfmEvent(validWithVenueJ) must beAnInstanceOf[LastfmEvent]
@@ -24,6 +24,14 @@ class LastfmEventSpec extends Specification {
 
     "raise an error when given an invalid event from Lastfm" in {
       LastfmEvent(invalidJ) must throwA[IllegalArgumentException]
+    }
+
+  }
+
+  "LastfmEvent.transform()" should {
+
+    "transform an event to Encore format" in {
+      LastfmEvent(validWithVenueJ).transform must beAnInstanceOf[EncoreEvent]
     }
 
   }
