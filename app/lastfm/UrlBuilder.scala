@@ -1,8 +1,7 @@
 package lastfm
 
-import play.api.Play
-
 import com.netaporter.uri.dsl._
+import play.api.Play
 
 object UrlBuilder {
 
@@ -19,7 +18,7 @@ object UrlBuilder {
 
   private def constructUrl(method: String, params: List[Tuple2[String, Any]]) = {
     val allParams = ("method" -> method) :: params ::: baseParams
-    baseUrl.addParams(allParams).toString
+    baseUrl.addParams(allParams).toString()
   }
 
 }

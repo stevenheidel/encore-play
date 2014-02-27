@@ -1,16 +1,14 @@
 package controllers
 
-import play.api._
-import play.api.mvc._
-import play.api.libs.json._
+import lastfm.UrlBuilder
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-
-import reactivemongo.api._
+import play.api.libs.json._
+import play.api.mvc._
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
-
-import lastfm.UrlBuilder
 import utils.ExternalApiCache
+
+object Application extends Controller
 
 object Events extends Controller with MongoController with ExternalApiCache {
 

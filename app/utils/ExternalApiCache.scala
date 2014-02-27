@@ -1,17 +1,13 @@
 package utils
 
 import play.api._
-import play.api.mvc._
-import play.api.mvc.Results._
-import play.api.libs.ws._
-import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-
+import play.api.libs.json._
+import play.api.libs.ws._
+import play.modules.reactivemongo.json.collection.JSONCollection
+import reactivemongo.api._
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
-
-import reactivemongo.api._
-import play.modules.reactivemongo.json.collection.JSONCollection
 
 trait ExternalApiCache {
 
