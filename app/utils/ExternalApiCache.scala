@@ -4,7 +4,6 @@ import play.api._
 import play.api.mvc._
 import play.api.mvc.Results._
 import play.api.libs.ws._
-import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 

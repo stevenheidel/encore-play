@@ -16,8 +16,6 @@ object Events extends Controller with MongoController with ExternalApiCache {
 
   def collection = db.collection[JSONCollection]("single_events")
 
-  val transformer = (__ \ "event").json.pick
-
   def get(id: Long) = Action.async {
     val path = UrlBuilder.event_getInfo(id)
     val searchParameters = Json.obj("event.id" -> id.toString)
