@@ -4,6 +4,7 @@ import play.api._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.libs.ws._
+import play.api.Play.current
 import play.modules.reactivemongo.json.collection.JSONCollection
 import reactivemongo.api._
 import scala.concurrent.Future
