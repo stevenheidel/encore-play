@@ -1,5 +1,6 @@
 package utils
 
+import org.joda.time.DateTime
 import play.api._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
@@ -9,22 +10,26 @@ import play.modules.reactivemongo.json.collection.JSONCollection
 import reactivemongo.api._
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
+import com.github.nscala_time.time.Imports._
+import reactivemongo.api.indexes.{Index, IndexType}
+import reactivemongo.bson._
 
 trait ExternalApiCache {
 
   // The MongoDB collection to use for the current method / group of methods
   def collection: JSONCollection
+  def expiry: Period
+  //def verify
 
-  /*
-  val name (of the service)
-  val expiry
-  def verify
-  */
+  collection.indexesManager.ensure(Index(
+    key = Seq("_createdAt" -> IndexType.Ascending),
+    options = BSONDocument("expireAfterSeconds" -> expiry.seconds)
+  ))
 
-  class ExternalApiCall(
-    path: String,
-    searchParameters: JsValue,
-    indexParameters: JsValue
+  case class ExternalApiCall(
+    path: String, // the URL of the web JSON to retrieve
+    searchParameters: JsObject,
+    indexParameters: JsObject
   ) {
 
     // Check to see if the response is in the database
@@ -32,10 +37,11 @@ trait ExternalApiCache {
       val dbCursor: Cursor[JsValue] = collection.find(searchParameters).cursor[JsValue]
       val dbList: Future[List[JsValue]] = dbCursor.collect[List]()
 
+      // Just get first record if multiple are found
       dbList.map {
         case Nil => None
-        // TODO: Get the response itself, not the whole document
-        case x :: xs => Some(x)
+        // Get the response itself, not the whole document
+        case x :: xs => Some(x \ "_response")
       }
     }
 
@@ -48,8 +54,15 @@ trait ExternalApiCache {
 
         // TODO: Verify response here
 
-        // TODO: Save with index parameters
-        collection.insert(externalJson).onComplete {
+        // Save raw response along with some indexing parameters in order to find it later
+        val extraRecords = Json.obj(
+          "_response" -> externalJson, 
+          "_url" -> path, 
+          "_createdAt" -> Json.obj("$date" -> DateTime.now.getMillis)
+        )
+        val databaseRecord = indexParameters ++ extraRecords
+
+        collection.insert(databaseRecord).onComplete {
           case Failure(e) => Logger.error("Error saving to database", e)
           case Success(e) => Logger.info("Saved to database: " + e) 
         }

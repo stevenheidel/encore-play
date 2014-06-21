@@ -7,19 +7,19 @@ import play.api.mvc._
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
 import utils.ExternalApiCache
-
-object Application extends Controller
+import com.github.nscala_time.time.Imports._
 
 object Events extends Controller with MongoController with ExternalApiCache {
 
   def collection = db.collection[JSONCollection]("single_events")
+  def expiry = 1.minute
 
   def get(id: Long) = Action.async {
     val path = UrlBuilder.event_getInfo(id)
-    val searchParameters = Json.obj("event.id" -> id.toString)
-    val indexParameters = JsNull
+    val searchParameters = Json.obj("event_id" -> id.toString)
+    val indexParameters = searchParameters
 
-    val response = new ExternalApiCall(path, searchParameters, indexParameters)
+    val response = ExternalApiCall(path, searchParameters, indexParameters)
     response.get().map(Ok(_))
   }
 
