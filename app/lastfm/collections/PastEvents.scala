@@ -21,6 +21,7 @@ case class PastEvents(
 object PastEvents {
   // Convert from Last.fm format
   implicit val pasteventsReads: Reads[PastEvents] = (
+    // If it's a single object, convert to a sequence of one item
     ((__ \ "events" \ "event").read[Seq[Event]] orElse (__ \ "events" \ "event").read[Event].map(Seq(_))) ~
     (__ \ "events" \ "@attr" \ "artist").read[String] ~
     (__ \ "events" \ "@attr" \ "festivalsonly").read[Boolean](binaryToBool) ~

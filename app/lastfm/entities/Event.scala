@@ -29,6 +29,7 @@ object Event {
   implicit val eventReads: Reads[Event] = (
     (__ \ "id").read[Long](safeToLong) ~ 
     (__ \ "title").read[String] ~
+    // If it's a single object, convert to a sequence of one item
     ((__ \ "artists" \ "artist").read[Seq[String]] orElse (__ \ "artists" \ "artist").read[String].map(Seq(_))) ~
     (__ \ "artists" \ "headliner").read[String] ~
     (__ \ "venue").readNullable[Venue] ~

@@ -77,7 +77,7 @@ object Past extends Controller with MongoController with ExternalApiCache {
         ExternalApiCall(path, searchParameters, indexParameters, currentTime).get().map(json =>
           json.validate[PastEvents] match {
             case s: JsSuccess[PastEvents] => s.get.events
-            case e: JsError => Seq()
+            case e: JsError => Seq() // TODO: And log an error
           }
         )
       }.toList
