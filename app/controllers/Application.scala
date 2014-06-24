@@ -8,6 +8,7 @@ import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
 import utils.ExternalApiCache
 import com.github.nscala_time.time.Imports._
+import lastfm.entities.Event
 
 object Events extends Controller with MongoController with ExternalApiCache {
 
@@ -20,7 +21,18 @@ object Events extends Controller with MongoController with ExternalApiCache {
     val indexParameters = searchParameters
 
     val response = ExternalApiCall(path, searchParameters, indexParameters)
-    response.get().map(Ok(_))
+    response.get().map(json =>
+      (json \ "event").validate[Event] match {
+        case s: JsSuccess[Event] => {
+          val event = s.get
+          println(event)
+          Ok(json)
+        }
+        case e: JsError => {
+          InternalServerError(JsError.toFlatJson(e).toString())
+        }
+      }
+    )
   }
 
 }
