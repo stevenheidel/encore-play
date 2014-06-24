@@ -29,7 +29,8 @@ trait ExternalApiCache {
   case class ExternalApiCall(
     path: String, // the URL of the web JSON to retrieve
     searchParameters: JsObject,
-    indexParameters: JsObject
+    indexParameters: JsObject,
+    date: DateTime = DateTime.now// can be used to sync caches so that multiple expire at the same time
   ) {
 
     // Check to see if the response is in the database
@@ -58,13 +59,13 @@ trait ExternalApiCache {
         val extraRecords = Json.obj(
           "_response" -> externalJson, 
           "_url" -> path, 
-          "_createdAt" -> Json.obj("$date" -> DateTime.now.getMillis)
+          "_createdAt" -> Json.obj("$date" -> date.getMillis)
         )
         val databaseRecord = indexParameters ++ extraRecords
 
         collection.insert(databaseRecord).onComplete {
           case Failure(e) => Logger.error("Error saving to database", e)
-          case Success(e) => Logger.info("Saved to database: " + e) 
+          case Success(e) => Logger.info("Saved to database") 
         }
 
         externalJson

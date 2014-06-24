@@ -4,6 +4,7 @@ import play.api._
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
+import lastfm.Helpers._
 
 case class Venue(
   id: Long, 
@@ -18,7 +19,7 @@ case class Venue(
 object Venue {
   // Convert from Last.fm format
   implicit val venueReads: Reads[Venue] = (
-    (__ \ "id").read[String].map(_.toLong) ~
+    (__ \ "id").read[Long](safeToLong) ~
     (__ \ "name").read[String] ~
     (__ \ "location").read[Location] ~
     (__ \ "url").read[String] ~

@@ -1,5 +1,8 @@
 # Encore
 # ~~~~~
 
+# Artists
+GET     /events/past.json              controllers.Past.get(artist_id: String)
+
 # Events
-GET     /events/:id                 controllers.Events.get(id: Long)
+GET     /events/:event_id.json         controllers.Single.get(event_id: Long)
