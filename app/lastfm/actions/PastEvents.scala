@@ -1,51 +1,22 @@
-package controllers
+package lastfm.actions
 
 import lastfm.UrlBuilder
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
-import play.api.mvc._
-import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
 import utils.ExternalApiCache
 import com.github.nscala_time.time.Imports._
 import lastfm.entities.Event
-import lastfm.collections.PastEvents
+import lastfm.collections.PastEventList
 import scala.concurrent.Future
+import scala.util.{Try, Success, Failure}
 
-object Single extends Controller with MongoController with ExternalApiCache {
-
-  def collection = db.collection[JSONCollection]("single_events")
-  def expiry = 1.minute
-
-  def get(event_id: Long) = Action.async {
-    val path = UrlBuilder.event_getInfo(event_id)
-    val searchParameters = Json.obj("event_id" -> event_id.toString)
-    val indexParameters = searchParameters
-
-    val response = ExternalApiCall(path, searchParameters, indexParameters)
-    
-    response.get().map(json =>
-      (json \ "event").validate[Event] match {
-        case s: JsSuccess[Event] => {
-          val event = s.get
-          println(event)
-          Ok(json)
-        }
-        case e: JsError => {
-          InternalServerError(JsError.toFlatJson(e).toString())
-        }
-      }
-    )
-  }
-
-}
-
-object Past extends Controller with MongoController with ExternalApiCache {
+object PastEvents extends ExternalApiCache {
 
   def collection = db.collection[JSONCollection]("past_events")
   def expiry = 1.minute
 
-  def get(artist_id: String) = Action.async {
+  def get(artist_id: String): Future[Seq[Event]] = {
     // Get the time to sync all the results
     val currentTime = DateTime.now
 
@@ -57,9 +28,9 @@ object Past extends Controller with MongoController with ExternalApiCache {
     val response = ExternalApiCall(path, searchParameters, indexParameters, currentTime)
 
     val numEvents: Future[Int] = response.get().map(json =>
-      json.validate[PastEvents] match {
-        case s: JsSuccess[PastEvents] => s.get.total
-        case e: JsError => 0
+      json.validate[PastEventList] match {
+        case s: JsSuccess[PastEventList] => s.get.total
+        case e: JsError => 0 // TODO: And log an error
       }
     )
 
@@ -75,18 +46,18 @@ object Past extends Controller with MongoController with ExternalApiCache {
         val indexParameters = searchParameters
 
         ExternalApiCall(path, searchParameters, indexParameters, currentTime).get().map(json =>
-          json.validate[PastEvents] match {
-            case s: JsSuccess[PastEvents] => s.get.events
+          json.validate[PastEventList] match {
+            case s: JsSuccess[PastEventList] => s.get.events
             case e: JsError => Seq() // TODO: And log an error
           }
         )
-      }.toList
+      }
 
       val future: Future[Seq[Seq[Event]]] = Future.sequence(futures)
 
       val eventList: Future[Seq[Event]] = future.map(_.flatten)
 
-      eventList.map(e => Ok(e.toString))
+      eventList
     }
   }
 

@@ -2,7 +2,7 @@
 # ~~~~~
 
 # Artists
-GET     /events/past.json              controllers.Past.get(artist_id: String)
+GET     /events/past.json              controllers.Application.pastEvents(artist_id: String)
 
 # Events
-GET     /events/:event_id.json         controllers.Single.get(event_id: Long)
+GET     /events/:event_id.json         controllers.Application.singleEvent(event_id: Long)

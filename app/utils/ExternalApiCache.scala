@@ -13,8 +13,11 @@ import scala.util.{Success, Failure}
 import com.github.nscala_time.time.Imports._
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson._
+import play.modules.reactivemongo.ReactiveMongoPlugin
 
 trait ExternalApiCache {
+
+  def db = ReactiveMongoPlugin.db
 
   // The MongoDB collection to use for the current method / group of methods
   def collection: JSONCollection

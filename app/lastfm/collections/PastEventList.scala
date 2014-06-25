@@ -7,7 +7,7 @@ import play.api.libs.functional.syntax._
 import lastfm.Helpers._
 import lastfm.entities.Event
 
-case class PastEvents(
+case class PastEventList(
   events: Seq[Event],
   artist: String, 
   festivalsonly: Boolean, 
@@ -18,9 +18,9 @@ case class PastEvents(
   total: Int
 )
 
-object PastEvents {
+object PastEventList {
   // Convert from Last.fm format
-  implicit val pasteventsReads: Reads[PastEvents] = (
+  implicit val pastEventListReads: Reads[PastEventList] = (
     // If it's a single object, convert to a sequence of one item
     ((__ \ "events" \ "event").read[Seq[Event]] orElse (__ \ "events" \ "event").read[Event].map(Seq(_))) ~
     (__ \ "events" \ "@attr" \ "artist").read[String] ~
@@ -30,5 +30,5 @@ object PastEvents {
     (__ \ "events" \ "@attr" \ "perPage").read[Int](safeToInt) ~
     (__ \ "events" \ "@attr" \ "totalPages").read[Int](safeToInt) ~
     (__ \ "events" \ "@attr" \ "total").read[Int](safeToInt)
-  )(PastEvents.apply _)
+  )(PastEventList.apply _)
 }
