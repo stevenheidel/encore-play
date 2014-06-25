@@ -12,9 +12,14 @@ object UrlBuilder {
   val baseUrl = "http://ws.audioscrobbler.com" / apiVersion
   val baseParams = List("format" -> apiFormat, "api_key" -> apiKey)
 
+  // http://www.last.fm/api/show/artist.getInfo
+  def artist_getInfo(artistName: String): String = {
+    constructUrl("artist.getInfo", List("artist" -> artistName))
+  }
+
   // http://www.last.fm/api/show/artist.getPastEvents
-  def artist_getPastEvents(artist: String, page: Int = 1, limit: Int = 50): String = {
-    constructUrl("artist.getPastEvents", List("artist" -> artist, "page" -> page, "limit" -> limit))
+  def artist_getPastEvents(artistName: String, page: Int = 1, limit: Int = 50): String = {
+    constructUrl("artist.getPastEvents", List("artist" -> artistName, "page" -> page, "limit" -> limit))
   }
 
   // http://www.last.fm/api/show/event.getInfo

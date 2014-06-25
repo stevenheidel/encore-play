@@ -5,6 +5,7 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import lastfm.Helpers._
+import lastfm.traits.HasImages
 
 case class Event(
   id: Long, 
@@ -22,7 +23,7 @@ case class Event(
   website: String, 
   tickets: Option[String], 
   cancelled: Boolean
-)
+) extends HasImages
 
 object Event {
   // Convert from Last.fm format
@@ -52,7 +53,7 @@ object Event {
         "name" -> event.title,
         "date" -> JsNull,
         "start_time" -> JsNull,
-        "image_url" -> JsNull,
+        "image_url" -> event.largestImage.url,
         "lastfm_url" -> event.url,
         "tickets_url" -> event.tickets,
         "venue_name" -> event.venue.map(_.name),
