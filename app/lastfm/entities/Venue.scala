@@ -27,4 +27,10 @@ object Venue {
     (__ \ "phonenumber").read[String] ~
     (__ \ "image").read[Seq[Image]]
   )(Venue.apply _)
+
+  implicit val venueWrites: Writes[Venue] = new Writes[Venue] {
+    def writes(venue: Venue): JsValue = {
+      Json.toJson(venue.location)
+    }
+  }
 }

@@ -22,4 +22,15 @@ object Location {
     (__ \ "street").read[String] ~
     (__ \ "postalcode").read[String]
   )(Location.apply _)
+
+  implicit val locationWrites: Writes[Location] = new Writes[Location] {
+    def writes(location: Location): JsValue = {
+      Json.obj(
+        "street" -> location.street,
+        "city" -> location.city,
+        "postalcode" -> location.postalcode,
+        "country" -> location.country
+      ) ++ Json.toJson(location.geo_point).asInstanceOf[JsObject]
+    }
+  }
 }

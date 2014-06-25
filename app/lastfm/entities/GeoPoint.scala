@@ -13,8 +13,17 @@ case class GeoPoint(
 
 object GeoPoint {
   // Convert from Last.fm format
-  implicit val geopointReads: Reads[GeoPoint] = (
+  implicit val geoPointReads: Reads[GeoPoint] = (
     (__ \ "geo:lat").read[Option[Double]](toDoubleOption) ~
     (__ \ "geo:long").read[Option[Double]](toDoubleOption)
   )(GeoPoint.apply _)
+
+  implicit val geoPointWrites: Writes[GeoPoint] = new Writes[GeoPoint] {
+    def writes(geoPoint: GeoPoint): JsValue = {
+      Json.obj(
+        "latitude" -> geoPoint.lat,
+        "longitude" -> geoPoint.long
+      )
+    }
+  }
 }

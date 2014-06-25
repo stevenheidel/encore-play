@@ -44,4 +44,22 @@ object Event {
     (__ \ "tickets").readNullable[String] ~
     (__ \ "cancelled").read[Boolean](binaryToBool)
   )(Event.apply _)
+
+  implicit val eventWrites: Writes[Event] = new Writes[Event] {
+    def writes(event: Event): JsValue = {
+      Json.obj(
+        "lastfm_id" -> event.id.toString(),
+        "name" -> event.title,
+        "date" -> JsNull,
+        "start_time" -> JsNull,
+        "image_url" -> JsNull,
+        "lastfm_url" -> event.url,
+        "tickets_url" -> event.tickets,
+        "venue_name" -> event.venue.map(_.name),
+        "venue" -> Json.toJson(event.venue),
+        "headliner" -> event.headliner,
+        "artists" -> event.artists.map(artist => Json.obj("artist" -> artist))
+      )
+    }
+  }
 }
