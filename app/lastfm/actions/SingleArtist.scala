@@ -15,14 +15,14 @@ object SingleArtist extends ExternalApiCache {
   def collection = db.collection[JSONCollection]("single_artists")
   def expiry = 1.minute
 
-  def get(artistName: String): Future[Try[Artist]] = {
+  def get(artistName: String): Future[Artist] = {
     val path = UrlBuilder.artist_getInfo(artistName)
     val searchParameters = Json.obj("artist_name" -> artistName)
     val indexParameters = searchParameters
 
     val response = ExternalApiCall(path, searchParameters, indexParameters)
     
-    response.get().map(json => Try((json \ "artist").as[Artist]))
+    response.get().map(json => (json \ "artist").as[Artist])
   }
 
 }

@@ -15,14 +15,14 @@ object SingleEvent extends ExternalApiCache {
   def collection = db.collection[JSONCollection]("single_events")
   def expiry = 1.minute
 
-  def get(event_id: Long): Future[Try[Event]] = {
+  def get(event_id: Long): Future[Event] = {
     val path = UrlBuilder.event_getInfo(event_id)
     val searchParameters = Json.obj("event_id" -> event_id.toString)
     val indexParameters = searchParameters
 
     val response = ExternalApiCall(path, searchParameters, indexParameters)
     
-    response.get().map(json => Try((json \ "event").as[Event]))
+    response.get().map(json => (json \ "event").as[Event])
   }
 
 }

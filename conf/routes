@@ -2,7 +2,8 @@
 # ~~~~~
 
 # Artists
-GET     /events/past.json              controllers.Application.pastEvents(artist_id: String)
+GET     /api/v2/artists/picture.json          controllers.Application.artistPicture(artist_id: String)
 
 # Events
-GET     /events/:event_id.json         controllers.Application.singleEvent(event_id: Long)
+GET     /api/v2/events/past.json              controllers.Application.pastEvents(artist_id: String)
+GET     /api/v2/events/:event_id.json         controllers.Application.singleEvent(event_id: Long)
