@@ -10,7 +10,11 @@ import lastfm.traits.HasImages
 case class Venue(
   id: Long, 
   name: String, 
-  location: Location, 
+  geo_point: GeoPoint, 
+  city: String, 
+  country: String, 
+  street: String, 
+  postalcode: String,
   url: String, 
   website: String, 
   phonenumber: String, 
@@ -22,7 +26,11 @@ object Venue {
   implicit val venueReads: Reads[Venue] = (
     (__ \ "id").read[Long](safeToLong) ~
     (__ \ "name").read[String] ~
-    (__ \ "location").read[Location] ~
+    (__ \ "geo:point").read[GeoPoint] ~
+    (__ \ "city").read[String] ~
+    (__ \ "country").read[String] ~
+    (__ \ "street").read[String] ~
+    (__ \ "postalcode").read[String] ~
     (__ \ "url").read[String] ~
     (__ \ "website").read[String] ~
     (__ \ "phonenumber").read[String] ~
@@ -31,7 +39,12 @@ object Venue {
 
   implicit val venueWrites: Writes[Venue] = new Writes[Venue] {
     def writes(venue: Venue): JsValue = {
-      Json.toJson(venue.location)
+      Json.obj(
+        "street" -> venue.street,
+        "city" -> venue.city,
+        "postalcode" -> venue.postalcode,
+        "country" -> venue.country
+      ) ++ Json.toJson(venue.geo_point).asInstanceOf[JsObject]
     }
   }
 }

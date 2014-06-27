@@ -22,7 +22,7 @@ object ArtistsController extends Controller {
       events <- if (tense == "past") PastEvents.get(artistName) else FutureEvents.get(artistName)
     } yield {
       val location = GeoPoint(Some(latitude), Some(longitude))
-      val filteredEvents = events.filter(_.venue.get.location.geo_point.distanceTo(location) < 100 * radius)
+      val filteredEvents = events.filter(_.venue.get.geo_point.distanceTo(location) < 100 * radius)
 
       Ok(Json.obj(
         "artist" -> Json.toJson(firstArtist),
