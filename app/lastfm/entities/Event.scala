@@ -8,6 +8,7 @@ import lastfm.Helpers._
 import lastfm.traits.HasImages
 import utils.GeoPoint
 import scala.language.implicitConversions
+import com.github.nscala_time.time.Imports._
 
 case class Event(
   id: Long, 
@@ -15,7 +16,7 @@ case class Event(
   artists: Seq[String],
   headliner: String,
   venue: Option[Venue], 
-  startDate: String, 
+  startDate: String, // Stores local time in format: "Mon, 07 Apr 2014 19:30:00"
   description: String, 
   image: Seq[Image], 
   attendance: Int, 
@@ -25,7 +26,16 @@ case class Event(
   website: String, 
   tickets: Option[String], 
   cancelled: Boolean
-) extends HasImages
+) extends HasImages {
+  // Returns local date in format: "2014-04-07"
+  lazy val justDate: String = {
+    val readFormat = new java.text.SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss")
+    val writeFormat = new java.text.SimpleDateFormat("yyyy-MM-dd")
+
+    val date = readFormat.parse(startDate)
+    writeFormat.format(date)
+  }
+}
 
 object Event {
   // Convert from Last.fm format
@@ -53,8 +63,8 @@ object Event {
       Json.obj(
         "lastfm_id" -> event.id.toString(),
         "name" -> event.title,
-        "date" -> JsNull,
-        "start_time" -> JsNull,
+        "date" -> event.justDate,
+        "start_time" -> event.startDate,
         "image_url" -> event.largestImage.url,
         "lastfm_url" -> event.url,
         "tickets_url" -> event.tickets,
