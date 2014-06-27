@@ -62,8 +62,6 @@ trait ExternalApiCache {
       request.map { externalResponse =>
         val externalJson = externalResponse.json
 
-        // TODO: Verify response here
-
         // Save raw response along with some indexing parameters in order to find it later
         val extraRecords = Json.obj(
           "_response" -> externalJson, 
@@ -96,7 +94,7 @@ trait ExternalApiCache {
         case Some(x) => Future.successful(x)
       }
 
-      json// TODO: .recover{}
+      json
     }
 
   }
