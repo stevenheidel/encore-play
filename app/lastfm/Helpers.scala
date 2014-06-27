@@ -5,6 +5,8 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import scala.util.Try
+import lastfm.entities.Event
+import utils.GeoPoint
 
 object Helpers {
   // Convert a reads to integer, defaulting to 0 if it fails

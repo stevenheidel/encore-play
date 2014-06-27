@@ -6,6 +6,8 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import lastfm.Helpers._
 import lastfm.traits.HasImages
+import utils.GeoPoint
+import scala.language.implicitConversions
 
 case class Event(
   id: Long, 
@@ -62,5 +64,14 @@ object Event {
         "artists" -> event.artists.map(artist => Json.obj("artist" -> artist))
       )
     }
+  }
+
+  // Takes an event and returns its latitude/longitude as a gepoint
+  implicit def geoPoint(event: Event): GeoPoint = {
+    // If missing information, use South Pole so Event is filtered out of results
+    val lat = event.venue.flatMap(_.lat).getOrElse(-90.0)
+    val long = event.venue.flatMap(_.long).getOrElse(0.0)
+
+    GeoPoint(lat, long)
   }
 }

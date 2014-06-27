@@ -18,3 +18,5 @@ libraryDependencies ++= Seq(
   cache,
   ws
 )
+
+scalacOptions ++= Seq("-feature")

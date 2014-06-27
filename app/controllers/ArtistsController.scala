@@ -7,7 +7,9 @@ import lastfm.actions._
 import play.api.libs.json._
 import scala.util.{Success, Failure}
 import scala.concurrent.Future
-import lastfm.entities.GeoPoint
+import utils.GeoPoint
+import lastfm.entities.Event
+import lastfm.Helpers
 
 object ArtistsController extends Controller {
 
@@ -21,8 +23,8 @@ object ArtistsController extends Controller {
       otherArtists = matchingArtists.tail
       events <- if (tense == "past") PastEvents.get(artistName) else FutureEvents.get(artistName)
     } yield {
-      val location = GeoPoint(Some(latitude), Some(longitude))
-      val filteredEvents = events.filter(_.venue.get.geo_point.distanceTo(location) < 100 * radius)
+      // 100 km is the max radius
+      val filteredEvents = GeoPoint.nearFilter[Event](events, GeoPoint(latitude, longitude), radius * 100.0)
 
       Ok(Json.obj(
         "artist" -> Json.toJson(firstArtist),

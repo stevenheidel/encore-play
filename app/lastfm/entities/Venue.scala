@@ -10,7 +10,8 @@ import lastfm.traits.HasImages
 case class Venue(
   id: Long, 
   name: String, 
-  geo_point: GeoPoint, 
+  lat: Option[Double],
+  long: Option[Double],
   city: String, 
   country: String, 
   street: String, 
@@ -26,11 +27,12 @@ object Venue {
   implicit val venueReads: Reads[Venue] = (
     (__ \ "id").read[Long](safeToLong) ~
     (__ \ "name").read[String] ~
-    (__ \ "geo:point").read[GeoPoint] ~
-    (__ \ "city").read[String] ~
-    (__ \ "country").read[String] ~
-    (__ \ "street").read[String] ~
-    (__ \ "postalcode").read[String] ~
+    (__ \ "location" \ "geo:point" \ "geo:lat").read[Option[Double]](toDoubleOption) ~
+    (__ \ "location" \ "geo:point" \ "geo:long").read[Option[Double]](toDoubleOption) ~
+    (__ \ "location" \ "city").read[String] ~
+    (__ \ "location" \ "country").read[String] ~
+    (__ \ "location" \ "street").read[String] ~
+    (__ \ "location" \ "postalcode").read[String] ~
     (__ \ "url").read[String] ~
     (__ \ "website").read[String] ~
     (__ \ "phonenumber").read[String] ~
@@ -43,8 +45,10 @@ object Venue {
         "street" -> venue.street,
         "city" -> venue.city,
         "postalcode" -> venue.postalcode,
-        "country" -> venue.country
-      ) ++ Json.toJson(venue.geo_point).asInstanceOf[JsObject]
+        "country" -> venue.country,
+        "latitude" -> venue.lat,
+        "longitude" -> venue.long
+      )
     }
   }
 }
