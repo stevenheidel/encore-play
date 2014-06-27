@@ -30,6 +30,11 @@ object UrlBuilder {
     constructUrl("artist.getPastEvents", Seq("artist" -> artistName), Some(pagination))
   }
 
+  // http://www.last.fm/api/show/artist.search
+  def artist_search(term: String): Uri = {
+    constructUrl("artist.search", Seq("artist" -> term))
+  }
+
   // http://www.last.fm/api/show/event.getInfo
   def event_getInfo(eventId: Long): Uri = {
     constructUrl("event.getInfo", Seq("event" -> eventId))

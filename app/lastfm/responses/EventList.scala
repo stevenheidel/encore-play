@@ -1,4 +1,4 @@
-package lastfm.collections
+package lastfm.responses
 
 import play.api._
 import play.api.libs.json._

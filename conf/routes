@@ -3,6 +3,7 @@
 
 ## Artists
 # External
+GET     /api/v2/artists/combined_search.json  controllers.ArtistsController.combinedSearch(latitude: Double, longitude: Double, radius: Double, term: String, tense: String)
 GET     /api/v2/artists/picture.json          controllers.ArtistsController.artistPicture(artist_id: String)
 GET     /api/v2/artists/info.json             controllers.ArtistsController.artistInfo(artist_id: String, limit_events: Int)
 # Internal

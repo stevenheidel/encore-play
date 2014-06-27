@@ -8,7 +8,7 @@ import play.modules.reactivemongo.json.collection.JSONCollection
 import utils.ExternalApiCache
 import com.github.nscala_time.time.Imports._
 import lastfm.entities.Event
-import lastfm.collections.EventList
+import lastfm.responses.EventList
 import scala.concurrent.Future
 import scala.util.{Try, Success, Failure}
 import com.netaporter.uri._

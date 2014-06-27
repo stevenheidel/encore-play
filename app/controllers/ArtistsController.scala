@@ -12,6 +12,24 @@ object ArtistsController extends Controller {
 
   // EXTERNAL ENDPOINTS: ie. used by iPhone application
 
+  def combinedSearch(latitude: Double, longitude: Double, radius: Double, term: String, tense: String) = Action.async {
+    for {
+      matchingArtists <- ArtistSearch.get(term)
+      firstArtist = matchingArtists.head
+      artistName = firstArtist.name
+      otherArtists = matchingArtists.tail
+      events <- if (tense == "past") PastEvents.get(artistName) else FutureEvents.get(artistName)
+    } yield {
+      val filteredEvents = events
+
+      Ok(Json.obj(
+        "artist" -> Json.toJson(firstArtist),
+        "others" -> Json.toJson(otherArtists),
+        "events" -> Json.toJson(filteredEvents)
+      ))
+    }
+  }
+
   def artistPicture(artist_id: String) = Action.async {
     SingleArtist.get(artist_id).map(artist => Ok(Json.obj("image_url" -> artist.largestImage.url)))
   }

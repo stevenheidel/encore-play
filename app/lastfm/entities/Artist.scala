@@ -13,7 +13,7 @@ case class Artist(
   url: String, 
   image: Seq[Image], 
   streamable: Boolean, 
-  ontour: Boolean
+  ontour: Option[Boolean]
   // ignore all these ones
   // stats, similar, tags, bio
 ) extends HasImages
@@ -26,6 +26,16 @@ object Artist {
     (__ \ "url").read[String] ~
     (__ \ "image").read[Seq[Image]] ~
     (__ \ "streamable").read[Boolean](binaryToBool) ~
-    (__ \ "ontour").read[Boolean](binaryToBool)
+    (__ \ "ontour").readNullable[Boolean](binaryToBool)
   )(Artist.apply _)
+
+  implicit val artistWrites: Writes[Artist] = new Writes[Artist] {
+    def writes(artist: Artist): JsValue = {
+      Json.obj(
+        "name" -> artist.name,
+        "lastfm_id" -> artist.name,
+        "image_url" -> artist.largestImage.url
+      )
+    }
+  }
 }
