@@ -14,6 +14,8 @@ import com.github.nscala_time.time.Imports._
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson._
 import play.modules.reactivemongo.ReactiveMongoPlugin
+import com.netaporter.uri._
+import java.util.concurrent.TimeoutException
 
 trait ExternalApiCache {
 
@@ -24,13 +26,15 @@ trait ExternalApiCache {
   def expiry: Period
   //def verify
 
+  val timeout = 10.seconds
+
   collection.indexesManager.ensure(Index(
     key = Seq("_createdAt" -> IndexType.Ascending),
     options = BSONDocument("expireAfterSeconds" -> expiry.seconds)
   ))
 
   case class ExternalApiCall(
-    path: String, // the URL of the web JSON to retrieve
+    path: Uri, // the URL of the web JSON to retrieve
     searchParameters: JsObject,
     indexParameters: JsObject,
     date: DateTime = DateTime.now// can be used to sync caches so that multiple expire at the same time
@@ -53,7 +57,9 @@ trait ExternalApiCache {
     private def getResponseAndCache: Future[JsValue] = {
       Logger.info("Called External API")
       
-      WS.url(path).get().map { externalResponse =>
+      val request = WS.url(path.toString()).withRequestTimeout(timeout.millis.toInt).get()
+
+      request.map { externalResponse =>
         val externalJson = externalResponse.json
 
         // TODO: Verify response here
@@ -61,7 +67,7 @@ trait ExternalApiCache {
         // Save raw response along with some indexing parameters in order to find it later
         val extraRecords = Json.obj(
           "_response" -> externalJson, 
-          "_url" -> path, 
+          "_url" -> path.toString(), 
           "_createdAt" -> Json.obj("$date" -> date.getMillis)
         )
         val databaseRecord = indexParameters ++ extraRecords
@@ -72,6 +78,8 @@ trait ExternalApiCache {
         }
 
         externalJson
+      } recover {
+        case t: TimeoutException => Logger.error("Request to WS timed out", t); JsNull
       }
     }
 

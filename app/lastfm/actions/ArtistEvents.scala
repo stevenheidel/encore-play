@@ -1,0 +1,88 @@
+package lastfm.actions
+
+import lastfm.{UrlBuilder, Pagination}
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.libs.json._
+import play.api._
+import play.modules.reactivemongo.json.collection.JSONCollection
+import utils.ExternalApiCache
+import com.github.nscala_time.time.Imports._
+import lastfm.entities.Event
+import lastfm.collections.EventList
+import scala.concurrent.Future
+import scala.util.{Try, Success, Failure}
+import com.netaporter.uri._
+
+trait ArtistEvents extends ExternalApiCache {
+
+  // Path is the only thing that changes between past and future
+  val makePath: (String, Pagination) => Uri
+
+  def get(artistName: String, count: Int = 0): Future[Seq[Event]] = {
+    // Get the time to sync all the results
+    val currentTime = DateTime.now
+
+    // Start by finding the number of events
+    def getNumEvents(): Future[Int] = {
+      val path = makePath(artistName, Pagination(limit = 1))
+      val searchParameters = Json.obj("artistName" -> artistName, "page" -> 1, "limit" -> 1)
+      val indexParameters = searchParameters
+
+      val response = ExternalApiCall(path, searchParameters, indexParameters, currentTime)
+
+      response.get().map(json =>
+        json.validate[EventList] match {
+          case s: JsSuccess[EventList] => s.get.total
+          case e: JsError => Logger.error("Could not get correct number of events"); 0
+        }
+      )
+    }
+
+    // Get number of events, if specified, otherwise get all of them
+    val numEvents: Future[Int] = if (count > 0) Future.successful(count) else getNumEvents()
+
+    // Get the events in chunks
+    val chunkSize = 10
+
+    numEvents.flatMap { n =>
+      val pages = (n.toDouble / chunkSize).ceil.toInt
+
+      val futures: Seq[Future[Seq[Event]]] = (1 to pages).map { page =>
+        val path = makePath(artistName, Pagination(limit = chunkSize, page = page))
+        val searchParameters = Json.obj("artistName" -> artistName, "page" -> page, "limit" -> chunkSize)
+        val indexParameters = searchParameters
+
+        ExternalApiCall(path, searchParameters, indexParameters, currentTime).get().map(json =>
+          json.validate[EventList] match {
+            case s: JsSuccess[EventList] => s.get.events
+            case e: JsError => Logger.error("Could not validate list of events"); Seq()
+          }
+        )
+      }
+
+      val future: Future[Seq[Seq[Event]]] = Future.sequence(futures)
+
+      val eventList: Future[Seq[Event]] = future.map(_.flatten)
+
+      eventList
+    }
+  }
+}
+
+object PastEvents extends ExternalApiCache with ArtistEvents {
+
+  def collection = db.collection[JSONCollection]("past_events")
+  def expiry = 1.minute
+
+  val makePath = UrlBuilder.artist_getPastEvents _
+
+}
+
+object FutureEvents extends ExternalApiCache with ArtistEvents {
+
+  def collection = db.collection[JSONCollection]("future_events")
+  def expiry = 1.minute
+
+  val makePath = UrlBuilder.artist_getEvents _
+
+}

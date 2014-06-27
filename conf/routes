@@ -1,9 +1,14 @@
 # Encore
 # ~~~~~
 
-# Artists
-GET     /api/v2/artists/picture.json          controllers.Application.artistPicture(artist_id: String)
+## Artists
+# External
+GET     /api/v2/artists/picture.json          controllers.ArtistsController.artistPicture(artist_id: String)
+GET     /api/v2/artists/info.json             controllers.ArtistsController.artistInfo(artist_id: String, limit_events: Int)
+# Internal
+GET     /api/v2/events/past.json              controllers.ArtistsController.pastEvents(artist_id: String)
 
-# Events
-GET     /api/v2/events/past.json              controllers.Application.pastEvents(artist_id: String)
-GET     /api/v2/events/:event_id.json         controllers.Application.singleEvent(event_id: Long)
+## Events
+# External
+# Internal
+GET     /api/v2/events/:event_id.json         controllers.EventsController.singleEvent(event_id: Long)
