@@ -28,12 +28,32 @@ case class Event(
   cancelled: Boolean
 ) extends HasImages {
   // Returns local date in format: "2014-04-07"
-  lazy val justDate: String = {
+  val justDate: String = {
     val readFormat = new java.text.SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss")
     val writeFormat = new java.text.SimpleDateFormat("yyyy-MM-dd")
 
     val date = readFormat.parse(startDate)
     writeFormat.format(date)
+  }
+
+  /* Tickets URL Algorithm
+      If "website" URL available, use (no text analysis).
+      Else, if "tickets" has URL, use. [haven't seen one in these tags at all, although slavik said 10% did when he checked]
+      Else, check "description": a. if only one URL exists, use. b. if more than 1 URL exists, use the text analysis script, use best match.
+      Else, use the URL in "venue""website" (not "venue""url")
+      Else, use the last.fm URL
+  */
+  val ticketsUrl: String = {
+    // from http://www.java-tutorial.ch/core-java-tutorial/extract-urls-using-java-regular-expressions
+    val pattern = "(https?:((//)|(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)"
+
+    lazy val urlsInDescription: Seq[String] = pattern.r.findAllIn(description).toSeq
+
+    if (website matches pattern) website
+    else if (tickets.getOrElse("") matches pattern) tickets.get
+    else if (urlsInDescription.nonEmpty) urlsInDescription.head
+    else if (venue.map(_.website).getOrElse("") matches pattern) venue.get.website
+    else url
   }
 }
 
@@ -67,7 +87,7 @@ object Event {
         "start_time" -> event.startDate,
         "image_url" -> event.largestImage.url,
         "lastfm_url" -> event.url,
-        "tickets_url" -> event.tickets,
+        "tickets_url" -> event.ticketsUrl,
         "venue_name" -> event.venue.map(_.name),
         "venue" -> Json.toJson(event.venue),
         "headliner" -> event.headliner,

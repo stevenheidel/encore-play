@@ -13,7 +13,7 @@ object EventsController extends Controller {
   // INTERNAL ENDPOINTS: ie. used only by Rails application or testing
 
   def singleEvent(event_id: Long) = Action.async {
-    SingleEvent.get(event_id).map(event => Ok(event.toString()))
+    SingleEvent.get(event_id).map(event => Ok(Json.toJson(event)))
   }
 
 }
