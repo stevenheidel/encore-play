@@ -24,4 +24,7 @@ object Helpers {
     case "1" => true
     case _ => false
   }
+
+  // The maximum radius to search on calls with latitude and longitude
+  val MaxDistance = 100.0
 }

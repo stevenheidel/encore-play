@@ -35,8 +35,8 @@ trait ExternalApiCache {
 
   case class ExternalApiCall(
     path: Uri, // the URL of the web JSON to retrieve
-    searchParameters: JsObject,
     indexParameters: JsObject,
+    searchParameters: JsObject,
     date: DateTime = DateTime.now// can be used to sync caches so that multiple expire at the same time
   ) {
 

@@ -40,6 +40,11 @@ object UrlBuilder {
     constructUrl("event.getInfo", Seq("event" -> eventId))
   }
 
+  // http://www.last.fm/api/show/geo.getEvents
+  def geo_getEvents(lat: Double, long: Double, distance: Double, pagination: Pagination): Uri = {
+    constructUrl("geo.getEvents", Seq("lat" -> lat, "long" -> long, "distance" -> distance), Some(pagination))
+  }
+
   private def constructUrl(
       method: String, 
       params: Seq[Tuple2[String, Any]], 

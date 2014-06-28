@@ -9,7 +9,7 @@ import scala.util.{Success, Failure}
 import scala.concurrent.Future
 import utils.GeoPoint
 import lastfm.entities.Event
-import lastfm.Helpers
+import lastfm.Helpers._
 
 object ArtistsController extends Controller {
 
@@ -21,10 +21,9 @@ object ArtistsController extends Controller {
       firstArtist = matchingArtists.head
       artistName = firstArtist.name
       otherArtists = matchingArtists.tail
-      events <- if (tense == "past") PastEvents.get(artistName) else FutureEvents.get(artistName)
+      events <- if (tense == "past") ArtistPastEvents.get(artistName) else ArtistFutureEvents.get(artistName)
     } yield {
-      // 100 km is the max radius
-      val filteredEvents = GeoPoint.nearFilter[Event](events, GeoPoint(latitude, longitude), radius * 100.0)
+      val filteredEvents = GeoPoint.nearFilter[Event](events, GeoPoint(latitude, longitude), radius * MaxDistance)
 
       Ok(Json.obj(
         "artist" -> Json.toJson(firstArtist),
@@ -40,8 +39,8 @@ object ArtistsController extends Controller {
 
   def artistInfo(artist_id: String, limit_events: Int) = Action.async {
     for {
-      past <- PastEvents.get(artist_id, limit_events)
-      future <- FutureEvents.get(artist_id, limit_events)
+      past <- ArtistPastEvents.get(artist_id, limit_events)
+      future <- ArtistFutureEvents.get(artist_id, limit_events)
     } yield {
       Ok(Json.obj(
         "name" -> artist_id,
@@ -51,12 +50,6 @@ object ArtistsController extends Controller {
         )
       ))
     }
-  }
-
-  // INTERNAL ENDPOINTS: ie. used only by Rails application or testing
-
-  def pastEvents(artist_id: String) = Action.async {
-    PastEvents.get(artist_id).map(list => Ok(Json.toJson(list)))
   }
 
 }

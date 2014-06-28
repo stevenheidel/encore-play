@@ -17,10 +17,10 @@ object SingleArtist extends ExternalApiCache {
 
   def get(artistName: String): Future[Artist] = {
     val path = UrlBuilder.artist_getInfo(artistName)
-    val searchParameters = Json.obj("artist_name" -> artistName)
-    val indexParameters = searchParameters
+    val indexParameters = Json.obj("artist_name" -> artistName)
+    val searchParameters = indexParameters
 
-    val response = ExternalApiCall(path, searchParameters, indexParameters)
+    val response = ExternalApiCall(path, indexParameters, searchParameters)
     
     response.get().map(json => (json \ "artist").as[Artist])
   }

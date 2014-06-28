@@ -17,10 +17,10 @@ object SingleEvent extends ExternalApiCache {
 
   def get(event_id: Long): Future[Event] = {
     val path = UrlBuilder.event_getInfo(event_id)
-    val searchParameters = Json.obj("event_id" -> event_id.toString)
-    val indexParameters = searchParameters
+    val indexParameters = Json.obj("event_id" -> event_id.toString)
+    val searchParameters = indexParameters
 
-    val response = ExternalApiCall(path, searchParameters, indexParameters)
+    val response = ExternalApiCall(path, indexParameters, searchParameters)
     
     response.get().map(json => (json \ "event").as[Event])
   }

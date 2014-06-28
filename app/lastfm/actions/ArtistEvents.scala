@@ -25,10 +25,10 @@ trait ArtistEvents extends ExternalApiCache {
     // Start by finding the number of events
     def getNumEvents(): Future[Int] = {
       val path = makePath(artistName, Pagination(limit = 1))
-      val searchParameters = Json.obj("artistName" -> artistName, "page" -> 1, "limit" -> 1)
-      val indexParameters = searchParameters
+      val indexParameters = Json.obj("artistName" -> artistName, "page" -> 1, "limit" -> 1)
+      val searchParameters = indexParameters
 
-      val response = ExternalApiCall(path, searchParameters, indexParameters, currentTime)
+      val response = ExternalApiCall(path, indexParameters, searchParameters, currentTime)
 
       response.get().map(json =>
         json.validate[EventList] match {
@@ -69,18 +69,18 @@ trait ArtistEvents extends ExternalApiCache {
   }
 }
 
-object PastEvents extends ExternalApiCache with ArtistEvents {
+object ArtistPastEvents extends ExternalApiCache with ArtistEvents {
 
-  def collection = db.collection[JSONCollection]("past_events")
+  def collection = db.collection[JSONCollection]("artist_past_events")
   def expiry = 1.minute
 
   val makePath = UrlBuilder.artist_getPastEvents _
 
 }
 
-object FutureEvents extends ExternalApiCache with ArtistEvents {
+object ArtistFutureEvents extends ExternalApiCache with ArtistEvents {
 
-  def collection = db.collection[JSONCollection]("future_events")
+  def collection = db.collection[JSONCollection]("artist_future_events")
   def expiry = 1.minute
 
   val makePath = UrlBuilder.artist_getEvents _
