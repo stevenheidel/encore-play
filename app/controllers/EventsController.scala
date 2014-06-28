@@ -21,4 +21,15 @@ object EventsController extends Controller {
     SingleEvent.get(event_id).map(event => Ok(Json.toJson(event)))
   }
 
+  def seatgeekUrl(event_id: Long) = Action.async {
+    for {
+      event <- SingleEvent.get(event_id)
+      seatgeekUrl <- seatgeek.TicketsUrl.get(event)
+    } yield {
+      Ok(Json.obj(
+        "seatgeek_url" -> seatgeekUrl
+      ))
+    }
+  }
+
 }

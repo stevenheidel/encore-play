@@ -37,7 +37,7 @@ trait ExternalApiCache {
     path: Uri, // the URL of the web JSON to retrieve
     indexParameters: JsObject,
     searchParameters: JsObject,
-    date: DateTime = DateTime.now// can be used to sync caches so that multiple expire at the same time
+    date: DateTime = DateTime.now // can be used to sync caches so that multiple expire at the same time
   ) {
 
     // Check to see if the response is in the database

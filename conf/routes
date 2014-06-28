@@ -11,3 +11,4 @@ GET     /api/v2/events/past.json              controllers.EventsController.pastE
 GET     /api/v2/events/today.json             controllers.EventsController.todaysEvents(latitude: Double, longitude: Double, radius: Double)
 GET     /api/v2/events/future.json            controllers.EventsController.futureEvents(latitude: Double, longitude: Double, radius: Double, page: Int, limit: Int)
 GET     /api/v2/events/:event_id.json         controllers.EventsController.singleEvent(event_id: Long)
+GET     /api/v2/events/:event_id/seatgeek_url.json  controllers.EventsController.seatgeekUrl(event_id: Long)
