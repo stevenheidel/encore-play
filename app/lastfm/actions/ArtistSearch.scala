@@ -13,7 +13,7 @@ import scala.concurrent.Future
 object ArtistSearch extends ExternalApiCache {
 
   def collection = db.collection[JSONCollection]("ArtistSearch")
-  def expiry = 1.minute
+  def expiry = 1.day
 
   def get(term: String): Future[Seq[Artist]] = {
     val path = UrlBuilder.artist_search(term)

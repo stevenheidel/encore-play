@@ -14,7 +14,7 @@ import scala.concurrent.Future
 object TicketsUrl extends ExternalApiCache {
 
   def collection = db.collection[JSONCollection]("seatgeek_url")
-  def expiry = 1.minute
+  def expiry = 1.day
 
   // retrieved from https://github.com/backchatio/scala-inflector/blob/master/src/main/scala/Inflector.scala
   private def dasherize(word: String): String = {

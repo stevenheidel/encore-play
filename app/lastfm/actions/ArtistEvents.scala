@@ -72,7 +72,7 @@ trait ArtistEvents extends ExternalApiCache {
 object ArtistPastEvents extends ExternalApiCache with ArtistEvents {
 
   def collection = db.collection[JSONCollection]("artist_past_events")
-  def expiry = 1.minute
+  def expiry = 1.day
 
   val makePath = UrlBuilder.artist_getPastEvents _
 
@@ -81,7 +81,7 @@ object ArtistPastEvents extends ExternalApiCache with ArtistEvents {
 object ArtistFutureEvents extends ExternalApiCache with ArtistEvents {
 
   def collection = db.collection[JSONCollection]("artist_future_events")
-  def expiry = 1.minute
+  def expiry = 1.day
 
   val makePath = UrlBuilder.artist_getEvents _
 

@@ -13,7 +13,7 @@ import scala.util.{Try, Success, Failure}
 object SingleEvent extends ExternalApiCache {
 
   def collection = db.collection[JSONCollection]("single_events")
-  def expiry = 1.minute
+  def expiry = 1.day
 
   def get(event_id: Long): Future[Event] = {
     val path = UrlBuilder.event_getInfo(event_id)
