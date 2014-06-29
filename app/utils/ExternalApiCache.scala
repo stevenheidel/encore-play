@@ -24,13 +24,12 @@ trait ExternalApiCache {
   // The MongoDB collection to use for the current method / group of methods
   def collection: JSONCollection
   def expiry: Period
-  //def verify
 
   val timeout = 10.seconds
 
   collection.indexesManager.ensure(Index(
     key = Seq("_createdAt" -> IndexType.Ascending),
-    options = BSONDocument("expireAfterSeconds" -> expiry.seconds)
+    options = BSONDocument("expireAfterSeconds" -> expiry.toStandardDuration.seconds)
   ))
 
   case class ExternalApiCall(
@@ -55,7 +54,7 @@ trait ExternalApiCache {
 
     // Get the response from external API and then cache it to the database
     private def getResponseAndCache: Future[JsValue] = {
-      Logger.info("Called External API")
+      //Logger.info("Called External API")
       
       val request = WS.url(path.toString()).withRequestTimeout(timeout.millis.toInt).get()
 
@@ -72,7 +71,7 @@ trait ExternalApiCache {
 
         collection.insert(databaseRecord).onComplete {
           case Failure(e) => Logger.error("Error saving to database", e)
-          case Success(e) => Logger.info("Saved to database") 
+          case Success(e) => ()//Logger.info("Saved to database") 
         }
 
         externalJson
