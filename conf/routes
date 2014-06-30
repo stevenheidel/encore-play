@@ -14,7 +14,7 @@ GET     /api/v2/events/:event_id.json         controllers.EventsController.singl
 GET     /api/v2/events/:event_id/seatgeek_url.json  controllers.EventsController.seatgeekUrl(event_id: Long)
 
 # API V1 Fallback
-GET     /api/v1/*path                         controllers.RedirectController.redirect(path: String)
-POST     /api/v1/*path                         controllers.RedirectController.redirect(path: String)
-PATCH     /api/v1/*path                         controllers.RedirectController.redirect(path: String)
-DELETE     /api/v1/*path                         controllers.RedirectController.redirect(path: String)
+GET     /api/v2/*path                         controllers.RedirectController.redirect(path: String)
+POST     /api/v2/*path                         controllers.RedirectController.redirect(path: String)
+PATCH     /api/v2/*path                         controllers.RedirectController.redirect(path: String)
+DELETE     /api/v2/*path                         controllers.RedirectController.redirect(path: String)
