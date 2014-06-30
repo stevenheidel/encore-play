@@ -25,6 +25,8 @@ trait ExternalApiCache {
   def collection: JSONCollection
   def expiry: Period
 
+  val jsonConverter: WSResponse => JsValue = _.json
+
   val timeout = 10.seconds
 
   collection.indexesManager.ensure(Index(
@@ -59,7 +61,7 @@ trait ExternalApiCache {
       val request = WS.url(path.toString()).withRequestTimeout(timeout.millis.toInt).get()
 
       request.map { externalResponse =>
-        val externalJson = externalResponse.json
+        val externalJson = jsonConverter(externalResponse)
 
         // Save raw response along with some indexing parameters in order to find it later
         val extraRecords = Json.obj(
@@ -85,7 +87,6 @@ trait ExternalApiCache {
     // the response to the database.
     // Verification: Checks if the response is valid, if it isn't then it
     // won't be saved to the database. 
-    // TODO: Either
     def get(): Future[JsValue] = {
       // Check if already saved to cache and if not then go get it
       val json: Future[JsValue] = checkCache flatMap {

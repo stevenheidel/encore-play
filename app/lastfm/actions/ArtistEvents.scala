@@ -30,12 +30,12 @@ trait ArtistEvents extends ExternalApiCache {
 
       val response = ExternalApiCall(path, indexParameters, searchParameters, currentTime)
 
-      response.get().map(json =>
+      response.get().map { json =>
         json.validate[EventList] match {
           case s: JsSuccess[EventList] => s.get.total
           case e: JsError => Logger.error("Could not get correct number of events"); 0
         }
-      )
+      }
     }
 
     // Get number of events, if specified, otherwise get all of them
@@ -52,12 +52,12 @@ trait ArtistEvents extends ExternalApiCache {
         val searchParameters = Json.obj("artistName" -> artistName, "page" -> page, "limit" -> chunkSize)
         val indexParameters = searchParameters
 
-        ExternalApiCall(path, searchParameters, indexParameters, currentTime).get().map(json =>
+        ExternalApiCall(path, searchParameters, indexParameters, currentTime).get().map { json =>
           json.validate[EventList] match {
             case s: JsSuccess[EventList] => s.get.events
             case e: JsError => Logger.error("Could not validate list of events"); Seq()
           }
-        )
+        }
       }
 
       val future: Future[Seq[Seq[Event]]] = Future.sequence(futures)
@@ -73,6 +73,9 @@ object ArtistPastEvents extends ExternalApiCache with ArtistEvents {
 
   def collection = db.collection[JSONCollection]("artist_past_events")
   def expiry = 1.day
+
+  // Past events with ampersands in artist name cause problems
+  override val jsonConverter = lastfm.XmlConvert.convert _
 
   val makePath = UrlBuilder.artist_getPastEvents _
 

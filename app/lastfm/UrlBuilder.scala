@@ -27,7 +27,10 @@ object UrlBuilder {
 
   // http://www.last.fm/api/show/artist.getPastEvents
   def artist_getPastEvents(artistName: String, pagination: Pagination): Uri = {
-    constructUrl("artist.getPastEvents", Seq("artist" -> artistName), Some(pagination))
+    // Use XML or JSON depending on artist name
+    val url = constructUrl("artist.getPastEvents", Seq("artist" -> artistName), Some(pagination))
+
+    if (artistName.contains('&')) url.filterQueryNames(_ != "format") else url
   }
 
   // http://www.last.fm/api/show/artist.search

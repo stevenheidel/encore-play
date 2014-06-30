@@ -13,6 +13,7 @@ libraryDependencies ++= Seq(
   "com.netaporter" %% "scala-uri" % "0.4.2",
   "com.github.nscala-time" %% "nscala-time" % "1.2.0",
   //"com.wordnik" %% "swagger-play2" % "1.3.6",
+  "net.liftweb" % "lift-json_2.11" % "2.6-M4",
   jdbc,
   anorm,
   cache,
