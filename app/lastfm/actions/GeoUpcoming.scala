@@ -15,7 +15,7 @@ object GeoUpcoming extends ExternalApiCache {
   def collection = db.collection[JSONCollection]("geo_upcoming")
   def expiry = 1.day
 
-  def get(latitude: Double, longitude: Double, radius: Double, page: Int, limit: Int): Future[Seq[Event]] = {
+  def get(latitude: Double, longitude: Double, radius: Double, page: Int, limit: Int): Future[(Int, Seq[Event])] = {
     /*
       2 digits of precision allows for 1.1km of accuracy
       In order to prevent caches never hitting with changing location, round to that precision
@@ -30,7 +30,10 @@ object GeoUpcoming extends ExternalApiCache {
 
     val response = ExternalApiCall(path, indexParameters, searchParameters)
     
-    response.get().map(_.as[EventList].events)
+    response.get().map { el =>
+      val e = el.as[EventList]
+      (e.total, e.events)
+    }
   }
 
 }

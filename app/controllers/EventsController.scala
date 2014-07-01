@@ -14,7 +14,12 @@ object EventsController extends Controller {
   def todaysEvents(latitude: Double, longitude: Double, radius: Double) = TODO
 
   def futureEvents(latitude: Double, longitude: Double, radius: Double, page: Int, limit: Int) = Action.async {
-    GeoUpcoming.get(latitude, longitude, radius * MaxDistance, page, limit).map(list => Ok(Json.toJson(list)))
+    GeoUpcoming.get(latitude, longitude, radius * MaxDistance, page, limit).map { 
+      case (total, list) => Ok(Json.obj(
+        "total" -> total,
+        "events" -> Json.toJson(list)
+      ))
+    }
   }
 
   def singleEvent(event_id: Long) = Action.async {
