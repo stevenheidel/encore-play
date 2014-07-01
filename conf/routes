@@ -13,6 +13,9 @@ GET     /api/v2/events/future.json            controllers.EventsController.futur
 GET     /api/v2/events/:event_id.json         controllers.EventsController.singleEvent(event_id: Long)
 GET     /api/v2/events/:event_id/seatgeek_url.json  controllers.EventsController.seatgeekUrl(event_id: Long)
 
+# Users
+#POST    /api/v2/users.json                    controllers.UsersController.create
+
 # API V1 Fallback
 GET     /api/v2/*path                         controllers.RedirectController.redirect(path: String)
 POST     /api/v2/*path                         controllers.RedirectController.redirect(path: String)
