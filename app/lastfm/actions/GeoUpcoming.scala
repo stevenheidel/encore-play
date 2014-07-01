@@ -25,7 +25,7 @@ object GeoUpcoming extends ExternalApiCache {
     val radRounded: Double = radius.round // and this to the nearest whole value
 
     val path = UrlBuilder.geo_getEvents(latitude, longitude, radius, Pagination(limit, page))
-    val indexParameters = Json.obj("lat" -> latRounded, "long" -> longRounded, "rad" -> radRounded)
+    val indexParameters = Json.obj("lat" -> latRounded, "long" -> longRounded, "rad" -> radRounded, "page" -> page, "limit" -> limit)
     val searchParameters = indexParameters
 
     val response = ExternalApiCall(path, indexParameters, searchParameters)
