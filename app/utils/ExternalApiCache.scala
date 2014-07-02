@@ -71,6 +71,7 @@ trait ExternalApiCache {
     }
  
     // Send multiple parallel requests, then recombine after
+    // Note that urls cannot be blank
     def getPar[T](urls: Seq[Uri], recombine: (T, T) => T)(implicit reads: Reads[T]): Future[T] = {
       val objs = urls.map(get[T])
       Future.sequence(objs).map(_.reduce(recombine))

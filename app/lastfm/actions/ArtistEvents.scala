@@ -38,7 +38,8 @@ trait ArtistEvents extends ExternalApiCache {
     val chunkSize = 10
 
     numEvents.flatMap { n =>
-      val pages = (n.toDouble / chunkSize).ceil.toInt
+      // Get at least one page so can return no result
+      val pages = math.max(1, (n.toDouble / chunkSize).ceil.toInt)
 
       val urls: Seq[Uri] = (1 to pages).map { page =>
         makePath(artistName, Pagination(limit = chunkSize, page = page))

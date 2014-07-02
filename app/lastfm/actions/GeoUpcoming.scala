@@ -26,7 +26,7 @@ object GeoUpcoming extends ExternalApiCache {
     
     // Get the events in chunks
     val chunkSize = 10
-    val pages = (limit.toDouble / chunkSize).ceil.toInt
+    val pages = math.max(1, (limit.toDouble / chunkSize).ceil.toInt)
 
     val urls = (1 to pages).map { page =>
       UrlBuilder.geo_getEvents(latRounded, longRounded, radRounded, Pagination(limit = chunkSize, page = page))
