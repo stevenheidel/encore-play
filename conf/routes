@@ -28,6 +28,8 @@ DELETE  /api/v2/users/:facebook_id/events/:event_id.json  controllers.UsersContr
 POST    /api/v2/users/:facebook_id/events/:event_id/add_facebook_friends  controllers.UsersController.addFriends(facebook_id: Long, event_id: Long)
 GET     /api/v2/users/:facebook_id/events/:event_id/facebook_friends  controllers.UsersController.listFriends(facebook_id: Long, event_id: Long)
 
+# Other
+GET     /ping                                       controllers.PingController.ping
 
 # API V1 Fallback
 #GET     /api/v2/*path                         controllers.RedirectController.redirect(path: String)
