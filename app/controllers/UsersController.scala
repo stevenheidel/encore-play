@@ -43,24 +43,29 @@ object UsersController extends Controller with MongoController {
     ))
   }
 
+  def listOrCheck(facebook_id: Long) = Action(parse.json) { request =>
+    if (request.body.toString.isEmpty) {
+      listEvents(facebook_id)
+    } else {
+      val lastfm_id = request.body \ "lastfm_id"
+      checkEvent(facebook_id, lastfm_id.toString.toLong)
+    }
+  }
+
   // UNIMPLEMENTED
-  def listEvents(facebook_id: Long) = Action { request =>
-    // List events
-    if (request.body.toString.isEmpty)
-      Ok(Json.parse("""
-        {
-          "events": {
-            "past": [],
-            "future": []
-          }
+  def listEvents(facebook_id: Long) = { 
+    Ok(Json.parse("""
+      {
+        "events": {
+          "past": [],
+          "future": []
         }
-      """))
-    // Check events
-    else Ok(Json.parse("""{"response": "false"}"""))
+      }
+    """))  
   }
 
   // UNIMPLEMENTED and unused because dealt with above
-  def checkEvent(facebook_id: Long) = Action {
+  def checkEvent(facebook_id: Long, event_id: Long) = {
     Ok(Json.parse("""{"response": "false"}"""))
   }
 

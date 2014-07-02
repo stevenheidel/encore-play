@@ -9,7 +9,7 @@ case class User(
   expiration_date: String,
   email: Option[String]
 ) {
-  lazy val facebook_image_url = s"https://graph.facebook.com/$facebook_id/picture?type=large"
+  val facebook_image_url = s"https://graph.facebook.com/$facebook_id/picture?type=large"
 }
 
 object User {
