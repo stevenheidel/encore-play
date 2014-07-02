@@ -38,9 +38,13 @@ object ArtistsController extends Controller {
   }
 
   def artistInfo(artist_id: String, limit_events: Int) = Action.async {
+    // Run requests in parallel
+    val pastF = ArtistPastEvents.get(artist_id, limit_events)
+    val futureF = ArtistFutureEvents.get(artist_id, limit_events)
+
     for {
-      past <- ArtistPastEvents.get(artist_id, limit_events)
-      future <- ArtistFutureEvents.get(artist_id, limit_events)
+      past <- pastF
+      future <- futureF
     } yield {
       Ok(Json.obj(
         "name" -> artist_id,
