@@ -9,9 +9,15 @@ import lastfm.Helpers._
 
 object EventsController extends Controller {
   
-  def pastEvents(latitude: Double, longitude: Double, radius: Double) = TODO
+  // UNIMPLEMENTED
+  def pastEvents(latitude: Double, longitude: Double, radius: Double) = Action {
+    Ok(Json.parse("""{"total": 0,"events": []}"""))
+  }
 
-  def todaysEvents(latitude: Double, longitude: Double, radius: Double) = TODO
+  // UNIMPLEMENTED
+  def todaysEvents(latitude: Double, longitude: Double, radius: Double) = Action {
+    Ok(Json.parse("""{"total": 0,"events": []}"""))
+  }
 
   def futureEvents(latitude: Double, longitude: Double, radius: Double, page: Int, limit: Int) = Action.async {
     GeoUpcoming.get(latitude, longitude, radius * MaxDistance, page, limit).map { 

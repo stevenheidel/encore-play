@@ -4,7 +4,7 @@ import play.api.libs.json.Json
 
 case class User(
   name: String,
-  facebook_id: String,
+  facebook_id: Long,
   oauth: String,
   expiration_date: String,
   email: Option[String]
