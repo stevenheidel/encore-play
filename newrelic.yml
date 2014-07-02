@@ -107,8 +107,7 @@ common: &default_settings
   # whether or not to capture HTTP params.  When true, frameworks can
   # exclude HTTP parameters from being captured.
   # Default is false.
-  attributes:
-    exclude: request.parameters.*
+  #capture_params: false
 
   # Tells transaction tracer and error collector to not to collect
   # specific http request parameters. 
@@ -119,7 +118,7 @@ common: &default_settings
   # custom parameters set on the message will be captured subject to
   # the filters on ignored_messaging_params.
   # Default is false.
-  capture_messaging_params: false
+  #capture_messaging_params: false
 
   # Tells transaction tracer and error collector to not to collect
   # specific message properties. 
