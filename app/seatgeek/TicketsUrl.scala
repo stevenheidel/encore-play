@@ -32,12 +32,10 @@ object TicketsUrl extends ExternalApiCache {
     val path = "http://api.seatgeek.com/2/events" ? ("aid" -> 10708) & 
                 ("taxonomies.name" -> "concert") & ("performers.slug" -> dasherize(event.headliner)) &
                 ("datetime_local" -> event.justDate)
-    val indexParameters = Json.obj("event_id" -> event.id)
-    val searchParameters = indexParameters
-
-    val response = ExternalApiCall(path, indexParameters, searchParameters)
     
-    response.get().map(json => ((json \ "events")(0) \ "url").asOpt[String])
+    ExternalApiCall.get[JsValue](path).map { json =>
+      ((json \ "events")(0) \ "url").asOpt[String]
+    }
   }
 
 }

@@ -9,7 +9,7 @@ object RedirectController extends Controller {
     val queryString: String = if (request.rawQueryString.nonEmpty) "?" + request.rawQueryString else ""
     val url: String = "http://on.encore.fm/api/v1/" + path + queryString
 
-    Logger.info("Redirected to: " + url)
+    Logger.debug("Redirected to: " + url)
     TemporaryRedirect(url)
   }
 

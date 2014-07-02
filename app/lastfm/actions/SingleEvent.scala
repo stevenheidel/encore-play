@@ -9,20 +9,17 @@ import com.github.nscala_time.time.Imports._
 import lastfm.entities.Event
 import scala.concurrent.Future
 import scala.util.{Try, Success, Failure}
+import lastfm.responses.SingleResponse
 
 object SingleEvent extends ExternalApiCache {
 
   def collection = db.collection[JSONCollection]("single_events")
   def expiry = 1.day
 
-  def get(event_id: Long): Future[Event] = {
-    val path = UrlBuilder.event_getInfo(event_id)
-    val indexParameters = Json.obj("event_id" -> event_id.toString)
-    val searchParameters = indexParameters
-
-    val response = ExternalApiCall(path, indexParameters, searchParameters)
-    
-    response.get().map(json => (json \ "event").as[Event])
+  def get(eventId: Long): Future[Event] = {
+    ExternalApiCall.get[SingleResponse](UrlBuilder.event_getInfo(eventId)).map { r =>
+      r.event.get
+    }
   }
 
 }

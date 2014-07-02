@@ -23,80 +23,95 @@ trait ExternalApiCache {
 
   // The MongoDB collection to use for the current method / group of methods
   def collection: JSONCollection
+
+  // How long the cache is valid
   def expiry: Period
 
+  // Take a response and turn it to JSON
   val jsonConverter: WSResponse => JsValue = _.json
 
+  // How long to wait for External API
   val timeout = 10.seconds
 
+  // Add expiry index and search index
   collection.indexesManager.ensure(Index(
-    key = Seq("_createdAt" -> IndexType.Ascending),
-    options = BSONDocument("expireAfterSeconds" -> expiry.toStandardDuration.seconds)
+    key = Seq("expiresAt" -> IndexType.Ascending),
+    options = BSONDocument("expireAfterSeconds" -> 0)
+  ))
+  collection.indexesManager.ensure(Index(
+    key = Seq("url" -> IndexType.Ascending)
   ))
 
-  case class ExternalApiCall(
-    path: Uri, // the URL of the web JSON to retrieve
-    indexParameters: JsObject,
-    searchParameters: JsObject,
-    date: DateTime = DateTime.now // can be used to sync caches so that multiple expire at the same time
-  ) {
-
-    // Check to see if the response is in the database
-    private def checkCache: Future[Option[JsValue]] = {
-      val dbCursor: Cursor[JsValue] = collection.find(searchParameters).cursor[JsValue]
-      val dbList: Future[List[JsValue]] = dbCursor.collect[List]()
-
-      // Just get first record if multiple are found
-      dbList.map {
-        case Nil => None
-        // Get the response itself, not the whole document
-        case x :: xs => Some(x \ "_response")
-      }
-    }
-
-    // Get the response from external API and then cache it to the database
-    private def getResponseAndCache: Future[JsValue] = {
-      //Logger.info("Called External API")
-      
-      val request = WS.url(path.toString()).withRequestTimeout(timeout.millis.toInt).get()
-
-      request.map { externalResponse =>
-        val externalJson = jsonConverter(externalResponse)
-
-        // Save raw response along with some indexing parameters in order to find it later
-        val extraRecords = Json.obj(
-          "_response" -> externalJson, 
-          "_url" -> path.toString(), 
-          "_createdAt" -> Json.obj("$date" -> date.getMillis)
-        )
-        val databaseRecord = indexParameters ++ extraRecords
-
-        collection.insert(databaseRecord).onComplete {
-          case Failure(e) => Logger.error("Error saving to database", e)
-          case Success(e) => ()//Logger.info("Saved to database") 
-        }
-
-        externalJson
-      } recover {
-        case t: TimeoutException => Logger.error("Request to WS timed out", t); JsNull
-      }
-    }
-
+  object ExternalApiCall {
     // Retrieves a response from the external API. If it is in cache, it will 
     // use that instead, otherwise it will call the webservice and then save
     // the response to the database.
     // Verification: Checks if the response is valid, if it isn't then it
     // won't be saved to the database. 
-    def get(): Future[JsValue] = {
-      // Check if already saved to cache and if not then go get it
-      val json: Future[JsValue] = checkCache flatMap {
-        case None => getResponseAndCache
+    def get[T](url: Uri)(implicit reads: Reads[T]): Future[T] = {
+      // Did we send a request to the API?
+      var calledApi = false
+
+      val json: Future[JsValue] = checkCache(url).flatMap {
+        case None => {
+          calledApi = true
+          getResponse(url)
+        }
         case Some(x) => Future.successful(x)
       }
 
-      json
+      // Attempt to validate the response
+      json.map { j =>
+        val obj = j.as[T]
+
+        if (calledApi) saveToCache(url, j)
+
+        obj
+      }
+    }
+ 
+    // Send multiple parallel requests, then recombine after
+    def getPar[T](urls: Seq[Uri], recombine: (T, T) => T)(implicit reads: Reads[T]): Future[T] = {
+      val objs = urls.map(get[T])
+      Future.sequence(objs).map(_.reduce(recombine))
     }
 
-  }
+    // Check to see if the response is in the database
+    private def checkCache(url: Uri): Future[Option[JsValue]] = {
+      val query = Json.obj("url" -> url.toString())
 
+      // Get only the first matching document and uncompress it
+      collection.find(query).one[JsValue].map(_.map { x =>
+        val cString = (x \ "response").toString()
+        val uString = StringCompression.uncompress(cString)
+        Json.parse(uString)
+      })
+    }
+
+    private def getResponse(url: Uri): Future[JsValue] = {
+      val response = WS.url(url.toString()).withRequestTimeout(timeout.millis.toInt).get()
+
+      response.map(r => r.status match {
+        case 200 =>
+        case x => Logger.error(s"Call to $url returned status code $x")
+      })
+
+      // Parse the response as JSON
+      response.map(jsonConverter)
+    }
+
+    private def saveToCache(url: Uri, response: JsValue): Unit = {
+      val document = Json.obj(
+        "url" -> url.toString(),
+        "response" -> StringCompression.compress(response.toString()),
+        "expiresAt" -> Json.obj(
+          "$date" -> (DateTime.now + expiry).getMillis
+        )
+      )
+
+      collection.insert(document) onFailure {
+        case e => Logger.error("Could not save to database", e)
+      }
+    }
+  }
 }

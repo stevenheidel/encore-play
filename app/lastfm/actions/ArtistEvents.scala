@@ -25,16 +25,9 @@ trait ArtistEvents extends ExternalApiCache {
     // Start by finding the number of events
     def getNumEvents(): Future[Int] = {
       val path = makePath(artistName, Pagination(limit = 1))
-      val indexParameters = Json.obj("artistName" -> artistName, "page" -> 1, "limit" -> 1)
-      val searchParameters = indexParameters
 
-      val response = ExternalApiCall(path, indexParameters, searchParameters, currentTime)
-
-      response.get().map { json =>
-        json.validate[EventList] match {
-          case s: JsSuccess[EventList] => s.get.total
-          case e: JsError => Logger.error("Could not get correct number of events"); 0
-        }
+      ExternalApiCall.get[EventList](path).map { r =>
+        r.total
       }
     }
 
@@ -47,24 +40,13 @@ trait ArtistEvents extends ExternalApiCache {
     numEvents.flatMap { n =>
       val pages = (n.toDouble / chunkSize).ceil.toInt
 
-      val futures: Seq[Future[Seq[Event]]] = (1 to pages).map { page =>
-        val path = makePath(artistName, Pagination(limit = chunkSize, page = page))
-        val searchParameters = Json.obj("artistName" -> artistName, "page" -> page, "limit" -> chunkSize)
-        val indexParameters = searchParameters
-
-        ExternalApiCall(path, searchParameters, indexParameters, currentTime).get().map { json =>
-          json.validate[EventList] match {
-            case s: JsSuccess[EventList] => s.get.events
-            case e: JsError => Logger.error("Could not validate list of events"); Seq()
-          }
-        }
+      val urls: Seq[Uri] = (1 to pages).map { page =>
+        makePath(artistName, Pagination(limit = chunkSize, page = page))
       }
 
-      val future: Future[Seq[Seq[Event]]] = Future.sequence(futures)
-
-      val eventList: Future[Seq[Event]] = future.map(_.flatten)
-
-      eventList
+      ExternalApiCall.getPar[EventList](urls, EventList.combine _).map { r =>
+        r.events
+      }
     }
   }
 }

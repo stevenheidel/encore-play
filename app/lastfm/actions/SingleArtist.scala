@@ -9,6 +9,7 @@ import com.github.nscala_time.time.Imports._
 import lastfm.entities.Artist
 import scala.concurrent.Future
 import scala.util.{Try, Success, Failure}
+import lastfm.responses.SingleResponse
 
 object SingleArtist extends ExternalApiCache {
 
@@ -16,13 +17,9 @@ object SingleArtist extends ExternalApiCache {
   def expiry = 1.day
 
   def get(artistName: String): Future[Artist] = {
-    val path = UrlBuilder.artist_getInfo(artistName)
-    val indexParameters = Json.obj("artist_name" -> artistName)
-    val searchParameters = indexParameters
-
-    val response = ExternalApiCall(path, indexParameters, searchParameters)
-    
-    response.get().map(json => (json \ "artist").as[Artist])
+    ExternalApiCall.get[SingleResponse](UrlBuilder.artist_getInfo(artistName)).map { r =>
+      r.artist.get
+    }
   }
 
 }

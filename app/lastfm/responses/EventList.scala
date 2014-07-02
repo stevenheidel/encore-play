@@ -34,4 +34,10 @@ object EventList {
     (__ \ "events" \ "@attr" \ "totalPages").read[Int](safeToInt) ~
     (__ \ "events" \ "@attr" \ "total").read[Int](safeToInt)
   )(EventList.apply _)
+
+  // Combine two EventLists
+  // Note that all the values other than .events are now worthless, be careful
+  def combine(e1: EventList, e2: EventList): EventList = {
+    e1.copy(events = e1.events ++ e2.events)
+  }
 }

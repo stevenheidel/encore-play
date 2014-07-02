@@ -16,13 +16,9 @@ object ArtistSearch extends ExternalApiCache {
   def expiry = 1.day
 
   def get(term: String): Future[Seq[Artist]] = {
-    val path = UrlBuilder.artist_search(term)
-    val indexParameters = Json.obj("term" -> term)
-    val searchParameters = indexParameters
-
-    val response = ExternalApiCall(path, indexParameters, searchParameters)
-    
-    response.get().map(json => json.as[SearchResult].artistMatches)
+    ExternalApiCall.get[SearchResult](UrlBuilder.artist_search(term)).map { r =>
+      r.artistMatches
+    }
   }
 
 }
