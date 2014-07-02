@@ -36,6 +36,9 @@ case class Event(
     writeFormat.format(date)
   }
 
+  // Lineup should have the headliner first, then everyone else with no duplicates
+  val lineup: Seq[String] = (headliner +: artists).distinct
+
   /* Tickets URL Algorithm
       If "website" URL available, use (no text analysis).
       Else, if "tickets" has URL, use. [haven't seen one in these tags at all, although slavik said 10% did when he checked]
@@ -91,7 +94,7 @@ object Event {
         "venue_name" -> event.venue.map(_.name),
         "venue" -> Json.toJson(event.venue),
         "headliner" -> event.headliner,
-        "artists" -> event.artists.map(artist => Json.obj("artist" -> artist))
+        "artists" -> event.lineup.map(artist => Json.obj("artist" -> artist))
       )
     }
   }
