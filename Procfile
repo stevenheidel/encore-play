@@ -1,1 +1,1 @@
-web: target/universal/stage/bin/encore -Dhttp.port=$PORT -Dmongodb.uri=$MONGOHQ_URL
+web: target/universal/stage/bin/encore -Dhttp.port=$PORT -Dmongodb.uri=$MONGOHQ_URL -J-javaagent:lib/newrelic/newrelic.jar -J-Dnewrelic.config.file=lib/newrelic/newrelic.yml
