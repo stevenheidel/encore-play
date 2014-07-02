@@ -20,7 +20,6 @@ object UsersController extends Controller with MongoController {
     unique = true
   ))
 
-  // UNIMPLEMENTED
   def create = Action.async(parse.json) { request =>
     request.body.validate[User].map { user =>
       collection.insert(user).map { lastError =>
