@@ -107,7 +107,8 @@ common: &default_settings
   # whether or not to capture HTTP params.  When true, frameworks can
   # exclude HTTP parameters from being captured.
   # Default is false.
-  capture_params: false
+  attributes:
+    exclude: request.parameters.*
 
   # Tells transaction tracer and error collector to not to collect
   # specific http request parameters. 
@@ -204,18 +205,19 @@ common: &default_settings
     # this, you must provide any new value as an empty list is ignored.
     ignore_status_codes: 404
 
-  # Analytics Events are used for Histograms and Percentiles. Unaggregated data is collected
-  # for each web transaction and sent to the server on harvest. 
-  analytics_events:
+  transaction_events:
+    # Analytics Events are used for Histograms and Percentiles. Unaggregated data is collected
+    # for each web transaction and sent to the server on harvest. 
+    analytics_events:
 
-    # Set to false to disable analytics events.
-    # Default is true.
-    enabled: true
+      # Set to false to disable analytics events.
+      # Default is true.
+      enabled: true
 
-    # Events are collected up to the configured amount. Afterwards, events are sampled to
-    # maintain an even distribution across the harvest cycle. Largest value accepted is 10000.
-    # Default is 2000.  Setting to 0 will disable.
-    max_samples_stored: 2000
+      # Events are collected up to the configured amount. Afterwards, events are sampled to
+      # maintain an even distribution across the harvest cycle. Largest value accepted is 10000.
+      # Default is 2000.  Setting to 0 will disable.
+      max_samples_stored: 2000
 
   # Cross Application Tracing adds request and response headers to
   # external calls using supported HTTP libraries to provide better
