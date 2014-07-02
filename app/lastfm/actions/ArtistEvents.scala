@@ -27,7 +27,7 @@ trait ArtistEvents extends ExternalApiCache {
       val path = makePath(artistName, Pagination(limit = 1))
 
       ExternalApiCall.get[EventList](path).map { r =>
-        r.total
+        r.meta.total
       }
     }
 

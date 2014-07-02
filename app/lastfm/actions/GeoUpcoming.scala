@@ -33,7 +33,7 @@ object GeoUpcoming extends ExternalApiCache {
     }
 
     ExternalApiCall.getPar[EventList](urls, EventList.combine _).map { r =>
-      (r.total, r.events)
+      (r.meta.total, r.events)
     }
   }
 
