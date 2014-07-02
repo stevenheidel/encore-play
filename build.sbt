@@ -18,8 +18,7 @@ libraryDependencies ++= Seq(
   "commons-io" % "commons-io" % "2.4",
   "commons-codec" % "commons-codec" % "1.9",
   // New Relic
-  "com.newrelic.agent.java" % "newrelic-agent" % "3.8.0",
-  "com.newrelic.agent.java" % "newrelic-api" % "3.8.0",
+  "com.newrelic.agent.java" % "newrelic-agent" % "3.7.2",
   // Defaults
   //jdbc,
   //anorm,
