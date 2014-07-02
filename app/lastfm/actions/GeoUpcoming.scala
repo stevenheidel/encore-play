@@ -23,10 +23,16 @@ object GeoUpcoming extends ExternalApiCache {
     val latRounded: Double = BigDecimal(latitude).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
     val longRounded: Double = BigDecimal(longitude).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
     val radRounded: Double = radius.round // and this to the nearest whole value
+    
+    // Get the events in chunks
+    val chunkSize = 10
+    val pages = (limit.toDouble / chunkSize).ceil.toInt
 
-    val path = UrlBuilder.geo_getEvents(latRounded, longRounded, radRounded, Pagination(limit, page))
+    val urls = (1 to pages).map { page =>
+      UrlBuilder.geo_getEvents(latRounded, longRounded, radRounded, Pagination(limit = chunkSize, page = page))
+    }
 
-    ExternalApiCall.get[EventList](path).map { r =>
+    ExternalApiCall.getPar[EventList](urls, EventList.combine _).map { r =>
       (r.total, r.events)
     }
   }
