@@ -7,9 +7,9 @@ GET     /api/v2/artists/picture.json                controllers.ArtistsControlle
 GET     /api/v2/artists/info.json                   controllers.ArtistsController.artistInfo(artist_id: String, limit_events: Int)
 
 # Events
-GET     /api/v2/events/past.json                    controllers.EventsController.pastEvents(latitude: Double, longitude: Double, radius: Double)
-GET     /api/v2/events/today.json                   controllers.EventsController.todaysEvents(latitude: Double, longitude: Double, radius: Double)
-GET     /api/v2/events/future.json                  controllers.EventsController.futureEvents(latitude: Double, longitude: Double, radius: Double, page: Int, limit: Int)
+GET     /api/v2/events/past.json                    controllers.EventsController.pastEvents(latitude: Double, longitude: Double, radius: Double, date: String)
+GET     /api/v2/events/today.json                   controllers.EventsController.todaysEvents(latitude: Double, longitude: Double, radius: Double, date: String)
+GET     /api/v2/events/future.json                  controllers.EventsController.futureEvents(latitude: Double, longitude: Double, radius: Double, page: Int, limit: Int, date: String)
 GET     /api/v2/events/:event_id.json               controllers.EventsController.singleEvent(event_id: Long)
 GET     /api/v2/events/:event_id/seatgeek_url.json  controllers.EventsController.seatgeekUrl(event_id: Long)
 

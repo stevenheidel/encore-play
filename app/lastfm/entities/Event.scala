@@ -36,6 +36,11 @@ case class Event(
     writeFormat.format(date)
   }
 
+  // Takes a date in ISO 8601 and determines if it is the same day
+  def isToday(date: String) = {
+    justDate == date.take("yyyy-MM-dd".length)
+  }
+
   // Lineup should have the headliner first, then everyone else with no duplicates
   val lineup: Seq[String] = (headliner +: artists).distinct
 

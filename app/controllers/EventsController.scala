@@ -6,24 +6,28 @@ import lastfm.actions._
 import play.api.libs.json._
 import scala.util.{Success, Failure}
 import lastfm.Helpers._
+import lastfm.Pagination
 
 object EventsController extends Controller {
   
   // UNIMPLEMENTED
-  def pastEvents(latitude: Double, longitude: Double, radius: Double) = Action {
+  def pastEvents(latitude: Double, longitude: Double, radius: Double, date: String) = Action {
     Ok(Json.parse("""{"total": 0,"events": []}"""))
   }
 
-  // UNIMPLEMENTED
-  def todaysEvents(latitude: Double, longitude: Double, radius: Double) = Action {
-    Ok(Json.parse("""{"total": 0,"events": []}"""))
+  def todaysEvents(latitude: Double, longitude: Double, radius: Double, date: String) = Action.async {
+    GeoUpcoming.get(latitude, longitude, radius * MaxDistance).map { 
+      case (total, list) => Ok(Json.obj(
+        "events" -> Json.toJson(list.filter(_.isToday(date)))
+      ))
+    }
   }
 
-  def futureEvents(latitude: Double, longitude: Double, radius: Double, page: Int, limit: Int) = Action.async {
-    GeoUpcoming.get(latitude, longitude, radius * MaxDistance, page, limit).map { 
+  def futureEvents(latitude: Double, longitude: Double, radius: Double, page: Int, limit: Int, date: String) = Action.async {
+    GeoUpcoming.get(latitude, longitude, radius * MaxDistance, Pagination(limit, page)).map { 
       case (total, list) => Ok(Json.obj(
         "total" -> total,
-        "events" -> Json.toJson(list)
+        "events" -> Json.toJson(list.filter(!_.isToday(date)))
       ))
     }
   }

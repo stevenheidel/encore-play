@@ -13,8 +13,6 @@ import lastfm.Helpers._
 
 object ArtistsController extends Controller {
 
-  // EXTERNAL ENDPOINTS: ie. used by iPhone application
-
   def combinedSearch(latitude: Double, longitude: Double, radius: Double, term: String, tense: String) = Action.async {
     for {
       matchingArtists <- ArtistSearch.get(term)
