@@ -95,7 +95,7 @@ object UsersController extends Controller with MongoController {
     )
 
     collection.update(query, update).map { lastError =>
-      Ok(Json.parse("""{"response": "success"}"""))
+      Ok(Json.obj("response" -> "success"))
     }
   }
 
@@ -108,7 +108,7 @@ object UsersController extends Controller with MongoController {
     )
 
     collection.update(query, update).map { lastError =>
-      Ok(Json.parse("""{"response": "success"}"""))
+      Ok(Json.obj("response" -> "success"))
     }
   }
 
