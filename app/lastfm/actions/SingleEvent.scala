@@ -22,4 +22,10 @@ object SingleEvent extends ExternalApiCache {
     }
   }
 
+  def multi(eventIds: Seq[Long]): Future[Seq[Event]] = {
+    val urls = eventIds.map(UrlBuilder.event_getInfo(_))
+
+    ExternalApiCall.getPar[Event](urls)
+  }
+
 }

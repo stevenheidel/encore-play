@@ -12,7 +12,7 @@ object EventsController extends Controller {
   
   // UNIMPLEMENTED
   def pastEvents(latitude: Double, longitude: Double, radius: Double, date: String) = Action {
-    Ok(Json.parse("""{"total": 0,"events": []}"""))
+    Ok(Json.parse("""{"events": []}"""))
   }
 
   def todaysEvents(latitude: Double, longitude: Double, radius: Double, date: String) = Action.async {

@@ -70,11 +70,10 @@ trait ExternalApiCache {
       }
     }
  
-    // Send multiple parallel requests, then recombine after
-    // Note that urls cannot be blank
-    def getPar[T](urls: Seq[Uri], recombine: (T, T) => T)(implicit reads: Reads[T]): Future[T] = {
+    // Send multiple parallel requests
+    def getPar[T](urls: Seq[Uri])(implicit reads: Reads[T]): Future[Seq[T]] = {
       val objs = urls.map(get[T])
-      Future.sequence(objs).map(_.reduce(recombine))
+      Future.sequence(objs)
     }
 
     // Check to see if the response is in the database

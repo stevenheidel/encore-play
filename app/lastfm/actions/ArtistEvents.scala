@@ -45,8 +45,8 @@ trait ArtistEvents extends ExternalApiCache {
         makePath(artistName, Pagination(limit = chunkSize, page = page))
       }
 
-      ExternalApiCall.getPar[EventList](urls, EventList.combine _).map { r =>
-        r.events
+      ExternalApiCall.getPar[EventList](urls).map { r =>
+        r.reduce(EventList.combine).events
       }
     }
   }

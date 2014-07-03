@@ -35,8 +35,9 @@ object GeoUpcoming extends ExternalApiCache {
       UrlBuilder.geo_getEvents(latRounded, longRounded, radRounded, Pagination(limit = chunkSize, page = page))
     }
 
-    ExternalApiCall.getPar[EventList](urls, EventList.combine _).map { r =>
-      (r.meta.total, r.events)
+    ExternalApiCall.getPar[EventList](urls).map { r =>
+      val eventList = r.reduce(EventList.combine)
+      (eventList.meta.total, eventList.events)
     }
   }
 
