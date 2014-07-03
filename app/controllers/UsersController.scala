@@ -63,7 +63,7 @@ object UsersController extends Controller with MongoController {
       eventsF.map { events =>
         Ok(Json.obj(
           "events" -> Json.obj(
-            "past" -> Json.parse("[]"),
+            "past" -> JsArray(),
             "future" -> Json.toJson(events)
           )
         ))
