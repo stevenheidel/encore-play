@@ -5,39 +5,26 @@ import play.api.mvc._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import scala.concurrent.Future
-import reactivemongo.api._
-import play.modules.reactivemongo.MongoController
-import play.modules.reactivemongo.json.collection.JSONCollection
-import reactivemongo.api.indexes.{Index, IndexType}
 import lastfm.Lastfm
 
-object UsersController extends Controller with MongoController {
-  def collection: JSONCollection = db.collection[JSONCollection]("users")
-
-  // Ensure only 1 user per facebook id
-  collection.indexesManager.ensure(Index(
-    key = Seq("facebook_id" -> IndexType.Ascending),
-    unique = true
-  ))
-
+object UsersController extends Controller {
+  
   def create = Action.async(parse.json) { request =>
-    val user = request.body.as[User]
+    val jUser = request.body.as[JsonUser]
 
-    collection.insert(user).map { lastError =>
+    User.insert(jUser).map { user =>
       Ok(Json.obj(
-        "user" -> user.jsonShort
+        "user" -> Json.toJson(user.asInstanceOf[JsonUser])
       ))
     }
   }
 
   def update(facebook_id: Long) = Action.async(parse.json) { request =>
-    val user = request.body.as[User]
+    val jUser = request.body.as[JsonUser]
 
-    val query = Json.obj("facebook_id" -> user.facebook_id)
-
-    collection.update(query, user).map { lastError =>
+    User.update(jUser).map { user =>
       Ok(Json.obj(
-        "user" -> user.jsonShort
+        "user" -> Json.toJson(user.asInstanceOf[JsonUser])
       ))
     }
   }
@@ -53,11 +40,9 @@ object UsersController extends Controller with MongoController {
   }
 
   def listEvents(facebook_id: Long) = {
-    val query = Json.obj("facebook_id" -> facebook_id)
-
-    collection.find(query).one[JsValue].flatMap { x =>
-      val user = x.get
-      val eventIds = (user \ "events").as[Seq[Long]]
+    User.get(facebook_id).flatMap { opt =>
+      val user = opt.get
+      val eventIds = user.events
       val eventsF = Lastfm.getEvents(eventIds)
 
       eventsF.map { events =>
@@ -72,14 +57,9 @@ object UsersController extends Controller with MongoController {
   }
 
   def checkEvent(facebook_id: Long, event_id: Long) = {
-    val query = Json.obj(
-      "facebook_id" -> facebook_id,
-      "events" -> event_id
-    )
-
-    collection.find(query).one[JsValue].map { x =>
+    User.hasEvent(facebook_id, event_id).map { x =>
       Ok(Json.obj(
-        "response" -> x.isDefined
+        "response" -> x
       ))
     }
   }
@@ -87,38 +67,39 @@ object UsersController extends Controller with MongoController {
   def addEvent(facebook_id: Long) = Action.async(parse.json) { request =>
     val lastfm_id = request.body \ "lastfm_id"
 
-    val query = Json.obj("facebook_id" -> facebook_id)
-    val update = Json.obj(
-      "$addToSet" -> Json.obj(
-        "events" -> lastfm_id.toString.toLong
-      )
-    )
-
-    collection.update(query, update).map { lastError =>
+    User.addEvent(facebook_id, lastfm_id.toString.toLong).map { lastError =>
       Ok(Json.obj("response" -> "success"))
     }
   }
 
   def removeEvent(facebook_id: Long, event_id: Long) = Action.async { 
-    val query = Json.obj("facebook_id" -> facebook_id)
-    val update = Json.obj(
-      "$pull" -> Json.obj(
-        "events" -> event_id
-      )
-    )
-
-    collection.update(query, update).map { lastError =>
+    User.removeEvent(facebook_id, event_id).map { lastError =>
       Ok(Json.obj("response" -> "success"))
     }
   }
 
-  // UNIMPLEMENTED
-  def addFriends(facebook_id: Long, event_id: Long) = Action {
-    Ok(Json.parse("[]"))
+  // FRIENDS
+
+  def addFriends(facebook_id: Long, event_id: Long) = Action.async(parse.json) { request =>
+    val rawFriends = (request.body \ "friends").as[Seq[JsonUser]]
+
+    // Add all to database if not there already
+    val friends = Future.sequence(rawFriends.map(User.upsert(_)))
+
+    friends.flatMap { fs =>
+      val friendIds = fs.map(_.facebook_id)
+
+      UserFriends.update(facebook_id, event_id, friendIds).map { userFriends =>
+        Ok(Json.toJson(fs.asInstanceOf[Seq[JsonUser]]))
+      }
+    }
   }
 
-  // UNIMPLEMENTED
-  def listFriends(facebook_id: Long, event_id: Long) = Action {
-    Ok(Json.parse("[]"))
+  def listFriends(facebook_id: Long, event_id: Long) = Action.async {
+    UserFriends.get(facebook_id, event_id).map { userFriends =>
+      val friends = userFriends.friend_ids.map(User.get(_))
+
+      Ok(Json.toJson(friends.asInstanceOf[Seq[JsonUser]]))
+    }
   }
 }
