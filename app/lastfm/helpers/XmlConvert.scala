@@ -1,4 +1,4 @@
-package lastfm
+package lastfm.helpers
 
 import play.api.libs.ws._
 import play.api.libs.json.{JsValue => PlayJsValue, Json => PlayJson}

@@ -1,6 +1,6 @@
 package lastfm.actions
 
-import lastfm.{UrlBuilder, Pagination}
+import lastfm.helpers.{UrlBuilder, Pagination}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.modules.reactivemongo.json.collection.JSONCollection

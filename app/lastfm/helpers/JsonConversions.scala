@@ -1,4 +1,4 @@
-package lastfm
+package lastfm.helpers
 
 import play.api._
 import play.api.libs.json._
@@ -8,7 +8,7 @@ import scala.util.Try
 import lastfm.entities.Event
 import utils.GeoPoint
 
-object Helpers {
+object JsonConversions {
   // Convert a reads to integer, defaulting to 0 if it fails
   def safeToInt(implicit r: Reads[String]): Reads[Int] = r.map(s => Try(s.toInt).getOrElse(0))
 
@@ -24,7 +24,4 @@ object Helpers {
     case "1" => true
     case _ => false
   }
-
-  // The maximum radius to search on calls with latitude and longitude
-  val MaxDistance = 100.0
 }

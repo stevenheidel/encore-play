@@ -1,4 +1,4 @@
-package controllers
+package users
 
 import play.api._
 import play.api.mvc._
@@ -9,7 +9,7 @@ import reactivemongo.api._
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
 import reactivemongo.api.indexes.{Index, IndexType}
-import models.User
+import lastfm.Lastfm
 
 object UsersController extends Controller with MongoController {
   def collection: JSONCollection = db.collection[JSONCollection]("users")
@@ -58,7 +58,7 @@ object UsersController extends Controller with MongoController {
     collection.find(query).one[JsValue].flatMap { x =>
       val user = x.get
       val eventIds = (user \ "events").as[Seq[Long]]
-      val eventsF = lastfm.actions.SingleEvent.multi(eventIds)
+      val eventsF = Lastfm.getEvents(eventIds)
 
       eventsF.map { events =>
         Ok(Json.obj(

@@ -1,12 +1,11 @@
-package controllers
+package lastfm
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
 import lastfm.actions._
 import play.api.libs.json._
 import scala.util.{Success, Failure}
-import lastfm.Helpers._
-import lastfm.Pagination
+import lastfm.helpers.Pagination
 
 object EventsController extends Controller {
   
@@ -16,7 +15,7 @@ object EventsController extends Controller {
   }
 
   def todaysEvents(latitude: Double, longitude: Double, radius: Double, date: String) = Action.async {
-    GeoUpcoming.get(latitude, longitude, radius * MaxDistance).map { 
+    GeoUpcoming.get(latitude, longitude, radius * Lastfm.maxDistance).map { 
       case (total, list) => Ok(Json.obj(
         "events" -> Json.toJson(list.takeWhile(_.isToday(date)))
       ))
@@ -24,7 +23,7 @@ object EventsController extends Controller {
   }
 
   def futureEvents(latitude: Double, longitude: Double, radius: Double, page: Int, limit: Int, date: String) = Action.async {
-    GeoUpcoming.get(latitude, longitude, radius * MaxDistance, Pagination(limit, page)).map { 
+    GeoUpcoming.get(latitude, longitude, radius * Lastfm.maxDistance, Pagination(limit, page)).map { 
       case (total, list) => Ok(Json.obj(
         "total" -> total,
         "events" -> Json.toJson(list.dropWhile(_.isToday(date)))

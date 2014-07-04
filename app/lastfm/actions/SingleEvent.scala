@@ -1,6 +1,6 @@
 package lastfm.actions
 
-import lastfm.UrlBuilder
+import lastfm.helpers.UrlBuilder
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.modules.reactivemongo.json.collection.JSONCollection

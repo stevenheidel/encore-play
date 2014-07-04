@@ -4,7 +4,7 @@ import play.api._
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
-import lastfm.Helpers._
+import lastfm.helpers.JsonConversions._
 import lastfm.traits.HasImages
 import utils.GeoPoint
 import scala.language.implicitConversions

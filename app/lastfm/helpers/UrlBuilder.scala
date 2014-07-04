@@ -1,4 +1,4 @@
-package lastfm
+package lastfm.helpers
 
 import com.netaporter.uri._
 import com.netaporter.uri.dsl._

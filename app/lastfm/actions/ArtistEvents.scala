@@ -1,6 +1,6 @@
 package lastfm.actions
 
-import lastfm.{UrlBuilder, Pagination}
+import lastfm.helpers.{UrlBuilder, Pagination}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api._
@@ -12,6 +12,7 @@ import lastfm.responses.EventList
 import scala.concurrent.Future
 import scala.util.{Try, Success, Failure}
 import com.netaporter.uri._
+import lastfm.helpers.XmlConvert
 
 trait ArtistEvents extends ExternalApiCache {
 
@@ -58,7 +59,7 @@ object ArtistPastEvents extends ExternalApiCache with ArtistEvents {
   def expiry = 1.day
 
   // Past events with ampersands in artist name cause problems
-  override val jsonConverter = lastfm.XmlConvert.convert _
+  override val jsonConverter = XmlConvert.convert _
 
   val makePath = UrlBuilder.artist_getPastEvents _
 

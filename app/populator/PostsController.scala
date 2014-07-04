@@ -1,4 +1,4 @@
-package controllers
+package populator
 
 import play.api._
 import play.api.mvc._

@@ -1,4 +1,4 @@
-package models
+package users
 
 import play.api._
 import play.api.libs.json._
@@ -29,6 +29,7 @@ case class User(
 }
 
 object User {
+  // Reading from request
   implicit val userReads: Reads[User] = (
     (__ \ "name").read[String] ~
     ((__ \ "facebook_id").read[Long] orElse (__ \ "facebook_id").read[String].map(_.toLong)) ~
