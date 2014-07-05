@@ -24,7 +24,7 @@ object JsonUser {
     Reads.pure(None) ~
     (__ \ "invite_sent").readNullable[Boolean] ~
     (__ \ "invite_timestamp").readNullable[String] ~
-    Reads.pure(Seq())
+    Reads.pure(None)
   )(User.apply _)
 
   implicit val userWrites: Writes[User] = new Writes[User] {
@@ -47,7 +47,7 @@ case class User(
   email: Option[String],
   invite_sent: Option[Boolean],
   invite_timestamp: Option[String],
-  events: Seq[Long]
+  events: Option[Seq[Long]]
 ) {
   val facebook_image_url = s"https://graph.facebook.com/$facebook_id/picture?type=large"
   val isInviteSent: Boolean = invite_sent.getOrElse(false) || oauth.isDefined
@@ -86,16 +86,14 @@ object User {
     }
   }
 
-  def update(user: User): Future[User] = {
+  def update(user: User, upsert: Boolean = false): Future[User] = {
     val query = Json.obj("facebook_id" -> user.facebook_id)
     val fields = Json.obj("$set" -> Json.toJson(user))
 
-    collection.update(query, fields).flatMap(_ => get(user))
+    collection.update(query, fields, upsert = upsert).flatMap(_ => get(user))
   }
 
-  def upsert(user: User): Future[User] = {
-    collection.update(user.facebook_id, user, upsert = true).flatMap(_ => get(user))
-  }
+  def upsert(user: User): Future[User] = update(user, true)
 
   def hasEvent(facebook_id: Long, event_id: Long): Future[Boolean] = {
     val query = Json.obj(

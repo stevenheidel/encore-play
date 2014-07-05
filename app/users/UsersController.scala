@@ -30,19 +30,17 @@ object UsersController extends Controller {
     }
   }
 
-  // Branches based on whether there is a lastfm_id parameter in the body or not
-  def listOrCheck(facebook_id: Long) = Action.async(parse.json) { request =>
-    if (request.body.toString.isEmpty) {
-      listEvents(facebook_id)
-    } else {
-      val lastfm_id = request.body \ "lastfm_id"
-      checkEvent(facebook_id, lastfm_id.toString.toLong)
+  def checkEvent(facebook_id: Long, event_id: Long) = Action.async {
+    User.hasEvent(facebook_id, event_id).map { x =>
+      Ok(Json.obj(
+        "response" -> x
+      ))
     }
   }
 
-  def listEvents(facebook_id: Long) = {
+  def listEvents(facebook_id: Long) = Action.async {
     User.get(facebook_id).flatMap { user =>
-      val eventIds = user.events
+      val eventIds = user.events.getOrElse(Seq())
       val eventsF = Lastfm.getEvents(eventIds)
 
       eventsF.map { events =>
@@ -56,18 +54,10 @@ object UsersController extends Controller {
     }
   }
 
-  def checkEvent(facebook_id: Long, event_id: Long) = {
-    User.hasEvent(facebook_id, event_id).map { x =>
-      Ok(Json.obj(
-        "response" -> x
-      ))
-    }
-  }
-
   def addEvent(facebook_id: Long) = Action.async(parse.json) { request =>
-    val lastfm_id = request.body \ "lastfm_id"
+    val lastfm_id = (request.body \ "lastfm_id").as[String].toLong
 
-    User.addEvent(facebook_id, lastfm_id.toString.toLong).map { lastError =>
+    User.addEvent(facebook_id, lastfm_id).map { lastError =>
       Ok(Json.obj("response" -> "success"))
     }
   }
@@ -90,16 +80,18 @@ object UsersController extends Controller {
       val friendIds = fs.map(_.facebook_id)
 
       UserFriends.update(facebook_id, event_id, friendIds).map { userFriends =>
-        Ok(Json.toJson(fs.asInstanceOf[Seq[User]]))
+        Ok(Json.toJson(fs))
       }
     }
   }
 
   def listFriends(facebook_id: Long, event_id: Long) = Action.async {
-    UserFriends.get(facebook_id, event_id).map { userFriends =>
-      val friends = userFriends.friend_ids.map(User.get(_))
+    UserFriends.get(facebook_id, event_id).flatMap { userFriends =>
+      val friends = Future.sequence(userFriends.friend_ids.map(User.get(_)))
 
-      Ok(Json.toJson(friends.asInstanceOf[Seq[User]]))
+      friends.map { fs =>
+        Ok(Json.toJson(fs))
+      }
     }
   }
 }

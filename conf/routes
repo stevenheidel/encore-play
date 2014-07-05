@@ -21,7 +21,8 @@ GET     /api/v2/events/:event_id/populating.json    populator.PostsController.ch
 # Users
 POST    /api/v2/users.json                          users.UsersController.create
 PATCH   /api/v2/users/:facebook_id                  users.UsersController.update(facebook_id: Long)
-GET     /api/v2/users/:facebook_id/events.json      users.UsersController.listOrCheck(facebook_id: Long)
+GET     /api/v2/users/:facebook_id/events.json      users.UsersController.checkEvent(facebook_id: Long, lastfm_id: Long)
+GET     /api/v2/users/:facebook_id/events.json      users.UsersController.listEvents(facebook_id: Long)
 POST    /api/v2/users/:facebook_id/events.json      users.UsersController.addEvent(facebook_id: Long)
 DELETE  /api/v2/users/:facebook_id/events/:event_id.json  users.UsersController.removeEvent(facebook_id: Long, event_id: Long)
 POST    /api/v2/users/:facebook_id/events/:event_id/add_facebook_friends  users.UsersController.addFriends(facebook_id: Long, event_id: Long)
