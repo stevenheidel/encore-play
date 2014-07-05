@@ -6,25 +6,26 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import scala.concurrent.Future
 import lastfm.Lastfm
+import users.JsonUser._
 
 object UsersController extends Controller {
   
   def create = Action.async(parse.json) { request =>
-    val jUser = request.body.as[JsonUser]
+    val jUser = request.body.as[User]
 
     User.insert(jUser).map { user =>
       Ok(Json.obj(
-        "user" -> Json.toJson(user.asInstanceOf[JsonUser])
+        "user" -> Json.toJson(user)
       ))
     }
   }
 
   def update(facebook_id: Long) = Action.async(parse.json) { request =>
-    val jUser = request.body.as[JsonUser]
+    val jUser = request.body.as[User]
 
     User.update(jUser).map { user =>
       Ok(Json.obj(
-        "user" -> Json.toJson(user.asInstanceOf[JsonUser])
+        "user" -> Json.toJson(user)
       ))
     }
   }
@@ -40,8 +41,7 @@ object UsersController extends Controller {
   }
 
   def listEvents(facebook_id: Long) = {
-    User.get(facebook_id).flatMap { opt =>
-      val user = opt.get
+    User.get(facebook_id).flatMap { user =>
       val eventIds = user.events
       val eventsF = Lastfm.getEvents(eventIds)
 
@@ -81,7 +81,7 @@ object UsersController extends Controller {
   // FRIENDS
 
   def addFriends(facebook_id: Long, event_id: Long) = Action.async(parse.json) { request =>
-    val rawFriends = (request.body \ "friends").as[Seq[JsonUser]]
+    val rawFriends = (request.body \ "friends").as[Seq[User]]
 
     // Add all to database if not there already
     val friends = Future.sequence(rawFriends.map(User.upsert(_)))
@@ -90,7 +90,7 @@ object UsersController extends Controller {
       val friendIds = fs.map(_.facebook_id)
 
       UserFriends.update(facebook_id, event_id, friendIds).map { userFriends =>
-        Ok(Json.toJson(fs.asInstanceOf[Seq[JsonUser]]))
+        Ok(Json.toJson(fs.asInstanceOf[Seq[User]]))
       }
     }
   }
@@ -99,7 +99,7 @@ object UsersController extends Controller {
     UserFriends.get(facebook_id, event_id).map { userFriends =>
       val friends = userFriends.friend_ids.map(User.get(_))
 
-      Ok(Json.toJson(friends.asInstanceOf[Seq[JsonUser]]))
+      Ok(Json.toJson(friends.asInstanceOf[Seq[User]]))
     }
   }
 }

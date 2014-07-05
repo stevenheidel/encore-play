@@ -5,38 +5,30 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import com.github.nscala_time.time.Imports._
-import scala.language.implicitConversions
 import reactivemongo.api._
 import play.modules.reactivemongo.ReactiveMongoPlugin
 import play.modules.reactivemongo.json.collection.JSONCollection
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import reactivemongo.core.commands.LastError
 import scala.concurrent.Future
 import reactivemongo.api.indexes.{Index, IndexType}
 import play.api.Play.current
 
-case class JsonUser(
-  name: String,
-  facebook_id: Long,
-  oauth: Option[String],
-  expiration_date: Option[String],
-  invite_sent: Boolean
-) {
-  val facebook_image_url = s"https://graph.facebook.com/$facebook_id/picture?type=large"
-  val isInviteSent: Boolean = invite_sent || oauth.isDefined
-}
-
+// Reading and writing from request
 object JsonUser {
-  // Reading from request
-  implicit val userReads: Reads[JsonUser] = (
+  implicit val userReads: Reads[User] = (
     (__ \ "name").read[String] ~
     ((__ \ "facebook_id").read[Long] orElse (__ \ "facebook_id").read[String].map(_.toLong)) ~
     (__ \ "oauth").readNullable[String] ~
     (__ \ "expiration_date").readNullable[String] ~
-    (__ \ "invite_sent").readNullable[Boolean].map(_.getOrElse(false))
-  )(JsonUser.apply _)
+    Reads.pure(None) ~
+    (__ \ "invite_sent").readNullable[Boolean] ~
+    (__ \ "invite_timestamp").readNullable[String] ~
+    Reads.pure(Seq())
+  )(User.apply _)
 
-  implicit val userWrites: Writes[JsonUser] = new Writes[JsonUser] {
-    def writes(u: JsonUser) = {
+  implicit val userWrites: Writes[User] = new Writes[User] {
+    def writes(u: User) = {
       Json.obj(
         "name" -> u.name,
         "facebook_image_url" -> u.facebook_image_url,
@@ -45,10 +37,6 @@ object JsonUser {
       )
     }
   }
-
-  implicit def databaseToJson(u: User): JsonUser = JsonUser(
-    u.name, u.facebook_id, u.oauth, u.expiration_date, u.invite_sent
-  )
 }
 
 case class User(
@@ -57,19 +45,17 @@ case class User(
   oauth: Option[String],
   expiration_date: Option[String],
   email: Option[String],
-  invite_sent: Boolean,
-  invite_timestamp: Option[DateTime],
+  invite_sent: Option[Boolean],
+  invite_timestamp: Option[String],
   events: Seq[Long]
-)
+) {
+  val facebook_image_url = s"https://graph.facebook.com/$facebook_id/picture?type=large"
+  val isInviteSent: Boolean = invite_sent.getOrElse(false) || oauth.isDefined
+}
 
 object User {
   // Only use for database reads and writes
   private implicit val userFormat: Format[User] = Json.format[User]
-
-  // Convert from a request JSON to the database version
-  implicit def jsonToDatabase(j: JsonUser): User = User(
-    j.name, j.facebook_id, j.oauth, j.expiration_date, None, j.invite_sent, None, Seq()
-  )
 
   def collection: JSONCollection = ReactiveMongoPlugin.db.collection[JSONCollection]("users")
 
@@ -79,28 +65,36 @@ object User {
     unique = true
   ))
 
+  // Throw caution to the wind and get latest version of user from the database
+  // Used for returning updated versions in other methods
+  def get(user: User): Future[User] = get(user.facebook_id)  
+  def get(facebook_id: Long): Future[User] = {
+    getOpt(facebook_id).map(_.get)
+  }
+
+  def getOpt(user: User): Future[Option[User]] = getOpt(user.facebook_id)
+  def getOpt(facebook_id: Long): Future[Option[User]] = {
+    val query = Json.obj("facebook_id" -> facebook_id)
+
+    collection.find(query).one[User]
+  }
+
   def insert(user: User): Future[User] = {
-    collection.insert(user).flatMap { lastError =>
-      get(user.facebook_id).map(_.get)
+    collection.insert(user).flatMap(_ => get(user)).recoverWith {
+      // User already exists
+      case LastError(_,_,Some(11000),_,_,_,_) => update(user)
     }
   }
 
   def update(user: User): Future[User] = {
-    collection.update(user.facebook_id, user).flatMap { lastError =>
-      get(user.facebook_id).map(_.get)
-    }
+    val query = Json.obj("facebook_id" -> user.facebook_id)
+    val fields = Json.obj("$set" -> Json.toJson(user))
+
+    collection.update(query, fields).flatMap(_ => get(user))
   }
 
   def upsert(user: User): Future[User] = {
-    collection.update(user.facebook_id, user, upsert = true).flatMap { lastError =>
-      get(user.facebook_id).map(_.get)
-    }
-  }
-
-  def get(facebook_id: Long): Future[Option[User]] = {
-    val query = Json.obj("facebook_id" -> facebook_id)
-
-    collection.find(query).one[User]
+    collection.update(user.facebook_id, user, upsert = true).flatMap(_ => get(user))
   }
 
   def hasEvent(facebook_id: Long, event_id: Long): Future[Boolean] = {
@@ -120,9 +114,7 @@ object User {
       )
     )
 
-    collection.update(query, update).flatMap { lastError =>
-      get(facebook_id).map(_.get)
-    }
+    collection.update(query, update).flatMap(_ => get(facebook_id))
   }
 
   def removeEvent(facebook_id: Long, event_id: Long): Future[User] = {
@@ -133,8 +125,6 @@ object User {
       )
     )
 
-    collection.update(query, update).flatMap { lastError =>
-      get(facebook_id).map(_.get)
-    }
+    collection.update(query, update).flatMap(_ => get(facebook_id))
   }
 }
