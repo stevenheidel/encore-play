@@ -22,6 +22,9 @@ case class ResponseCodeException(url: Uri, code: Int) extends
 case class JsonParseException(url: Uri, message: String) extends 
   RuntimeException(s"Could not parse JSON from '$url' because: $message")
 
+// TODO: Instead of being a trait, this should have case class Options for the various settings
+// TODO: Add inspection of X-ratelimit-remaining header
+
 trait ExternalApiCache {
 
   def db = ReactiveMongoPlugin.db

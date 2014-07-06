@@ -24,9 +24,11 @@ object PostsController extends Controller {
   // DELETE WHEN FINISHED
   def test = Action.async {
     import play.api.libs.concurrent.Execution.Implicits.defaultContext
-    import populator.instagram.actions._
+    import lastfm.actions.SingleEvent
 
-    LocationSearch.get(43.670906, -79.393331).map(x => Ok(x.toString))
+    SingleEvent.get(3839481).flatMap { e =>
+      Populator.instagramLocationsForVenue(e.venue.get).map(x => Ok(x.toString))
+    }
   }
 
 }

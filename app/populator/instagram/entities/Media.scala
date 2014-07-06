@@ -8,7 +8,7 @@ import play.api.libs.functional.syntax._
 case class Media(
   id: String,
   typ: String,
-  caption: String,
+  caption: Option[String],
   link: String,
   image_url: String,
   user_name: String,
@@ -20,11 +20,11 @@ object Media {
   implicit val mediaReads: Reads[Media] = (
     (__ \ "id").read[String] ~
     (__ \ "type").read[String] ~
-    (__ \ "caption").read[String] ~
+    (__ \ "caption" \ "text").readNullable[String] ~
     (__ \ "link").read[String] ~
-    (__ \ "image_url").read[String] ~
-    (__ \ "user_name").read[String] ~
-    (__ \ "user_profile_picture").read[String] ~
-    (__ \ "user_id").read[String]
+    (__ \ "images" \ "standard_resolution" \ "url").read[String] ~
+    (__ \ "user" \ "username").read[String] ~
+    (__ \ "user" \ "profile_picture").read[String] ~
+    (__ \ "user" \ "id").read[String]
   )(Media.apply _)
 }

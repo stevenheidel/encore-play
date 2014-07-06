@@ -27,3 +27,5 @@ libraryDependencies ++= Seq(
 )
 
 scalacOptions ++= Seq("-feature")
+
+javacOptions ++= Seq("-Xlint:unchecked")

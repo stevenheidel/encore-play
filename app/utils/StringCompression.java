@@ -1,4 +1,4 @@
-// Retrieved from http://lifelongprogrammer.blogspot.ca/2013/11/java-use-zip-stream-and-base64-to-compress-big-string.html
+// Retrieved from: http://lifelongprogrammer.blogspot.ca/2013/11/java-use-zip-stream-and-base64-to-compress-big-string.html
 
 package utils;
 

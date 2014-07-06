@@ -21,4 +21,10 @@ object LocationSearch extends ExternalApiCache {
     }
   }
 
+  def get(foursquareId: String): Future[Seq[Location]] = {
+    ExternalApiCall.get[LocationEnvelope](UrlBuilder.foursquare_location(foursquareId)).map { r =>
+      r.locations
+    }
+  }
+
 }

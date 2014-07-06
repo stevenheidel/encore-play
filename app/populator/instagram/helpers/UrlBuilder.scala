@@ -13,9 +13,21 @@ object UrlBuilder {
   val baseParams = Seq("client_id" -> apiKey)
 
   def location_search(latitude: Double, longitude: Double): Uri = {
-    val allParams = baseParams ++ Seq("lat" -> latitude, "lng" -> longitude)
+    val params = Seq("lat" -> latitude, "lng" -> longitude)
 
-    (baseUrl / "locations/search").addParams(allParams)
+    constructUrl("locations/search", params)
+  }
+
+  def foursquare_location(foursquareId: String): Uri = {
+    val params = Seq("foursquare_v2_id" -> foursquareId)
+
+    constructUrl("locations/search", params)
+  }
+
+  private def constructUrl(method: String, params: Seq[Tuple2[String, Any]]): Uri = {
+    val allParams = baseParams ++ params
+
+    (baseUrl / method).addParams(allParams)
   }
 
 }
