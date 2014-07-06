@@ -9,13 +9,18 @@ import play.api.Play.current
 import play.modules.reactivemongo.json.collection.JSONCollection
 import reactivemongo.api._
 import scala.concurrent.Future
-import scala.util.{Success, Failure}
 import com.github.nscala_time.time.Imports._
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson._
 import play.modules.reactivemongo.ReactiveMongoPlugin
 import com.netaporter.uri._
 import java.util.concurrent.TimeoutException
+
+case class ResponseCodeException(url: Uri, code: Int) extends 
+  RuntimeException(s"HTTP Error code '$code' received on call to '$url'")
+
+case class JsonParseException(url: Uri, message: String) extends 
+  RuntimeException(s"Could not parse JSON from '$url' because: $message")
 
 trait ExternalApiCache {
 
@@ -62,7 +67,10 @@ trait ExternalApiCache {
 
       // Attempt to validate the response
       json.map { j =>
-        val obj = j.as[T]
+        val obj = j.validate[T] match {
+          case s: JsSuccess[T] => s.get
+          case e: JsError => throw JsonParseException(url, JsError.toFlatJson(e).toString())
+        }
 
         if (calledApi) saveToCache(url, j)
 
@@ -93,7 +101,7 @@ trait ExternalApiCache {
 
       response.map(r => r.status match {
         case 200 =>
-        case x => Logger.error(s"Call to $url returned status code $x")
+        case x => throw ResponseCodeException(url, x)
       })
 
       // Parse the response as JSON
@@ -110,7 +118,7 @@ trait ExternalApiCache {
       )
 
       collection.insert(document) onFailure {
-        case e => Logger.error("Could not save to database", e)
+        case e => Logger.error(s"Could not save cache for $url to database", e)
       }
     }
   }

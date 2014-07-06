@@ -8,7 +8,8 @@ import populator.instagram.entities._
 
 case class LocationEnvelope(
   meta: Meta,
-  data: Seq[Location]
+  data: Seq[Location],
+  pagination: Option[Pagination]
 ) {
   val locations = data
 }
