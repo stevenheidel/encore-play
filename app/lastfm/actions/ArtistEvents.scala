@@ -55,7 +55,7 @@ trait ArtistEvents extends ExternalApiCache {
 
 object ArtistPastEvents extends ExternalApiCache with ArtistEvents {
 
-  def collection = db.collection[JSONCollection]("artist_past_events")
+  def collection = db.collection[JSONCollection]("cache_lastfm_artist_past")
   def expiry = 1.day
 
   // Past events with ampersands in artist name cause problems
@@ -67,7 +67,7 @@ object ArtistPastEvents extends ExternalApiCache with ArtistEvents {
 
 object ArtistFutureEvents extends ExternalApiCache with ArtistEvents {
 
-  def collection = db.collection[JSONCollection]("artist_future_events")
+  def collection = db.collection[JSONCollection]("cache_lastfm_artist_future")
   def expiry = 1.day
 
   val makePath = UrlBuilder.artist_getEvents _

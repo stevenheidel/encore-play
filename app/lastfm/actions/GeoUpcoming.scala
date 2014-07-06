@@ -12,7 +12,7 @@ import scala.concurrent.Future
 
 object GeoUpcoming extends ExternalApiCache {
 
-  def collection = db.collection[JSONCollection]("geo_upcoming")
+  def collection = db.collection[JSONCollection]("cache_lastfm_geo_upcoming")
   def expiry = 1.day
 
   def get(latitude: Double, longitude: Double, radius: Double, pagination: Pagination = Pagination()): Future[(Int, Seq[Event])] = {

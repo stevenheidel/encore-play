@@ -13,7 +13,7 @@ import lastfm.responses.SingleResponse
 
 object SingleArtist extends ExternalApiCache {
 
-  def collection = db.collection[JSONCollection]("single_artists")
+  def collection = db.collection[JSONCollection]("cache_lastfm_artist_info")
   def expiry = 1.day
 
   def get(artistName: String): Future[Artist] = {
