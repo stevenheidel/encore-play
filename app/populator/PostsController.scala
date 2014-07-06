@@ -21,4 +21,12 @@ object PostsController extends Controller {
     Ok(Json.parse("""{"response": "false"}"""))
   }
 
+  // DELETE WHEN FINISHED
+  def test = Action.async {
+    import play.api.libs.concurrent.Execution.Implicits.defaultContext
+    import populator.instagram.actions._
+
+    LocationSearch.get(43.670906, -79.393331).map(x => Ok(x.toString))
+  }
+
 }

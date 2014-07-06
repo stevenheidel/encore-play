@@ -13,7 +13,7 @@ object UrlBuilder {
   val baseParams = Seq("client_id" -> apiKey)
 
   def location_search(latitude: Double, longitude: Double): Uri = {
-    val allParams = baseParams ++ Seq("lat" -> latitude, "long" -> longitude)
+    val allParams = baseParams ++ Seq("lat" -> latitude, "lng" -> longitude)
 
     (baseUrl / "locations/search").addParams(allParams)
   }

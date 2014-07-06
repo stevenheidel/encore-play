@@ -6,12 +6,13 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import populator.instagram.entities._
 
-case class Envelope(
+case class LocationEnvelope(
   meta: Meta,
-  data: Seq[Location],
-  pagination: Pagination
-)
+  data: Seq[Location]
+) {
+  val locations = data
+}
 
-object Envelope {
-  implicit val envelopeReads = Json.reads[Envelope]
+object LocationEnvelope {
+  implicit val envelopeReads = Json.reads[LocationEnvelope]
 }
