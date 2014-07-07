@@ -13,7 +13,7 @@ import populator.instagram.entities.{Media, Location}
 object LocationRecentMedia extends ExternalApiCache {
 
   def collection = db.collection[JSONCollection]("cache_instagram_location_media")
-  def expiry = 1.day
+  def expiry = 30.minutes // should keep updating, especially if event is live
 
   def convertToUnixTime(date: DateTime): Long = {
     date.getMillis() / 1000L // Unix time is in seconds, not milliseconds

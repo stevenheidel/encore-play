@@ -9,6 +9,7 @@ import com.github.nscala_time.time.Imports._
 import lastfm.responses.EventList
 import lastfm.entities.Event
 import scala.concurrent.Future
+import utils.GeoPoint
 
 object GeoUpcoming extends ExternalApiCache {
 
@@ -16,13 +17,10 @@ object GeoUpcoming extends ExternalApiCache {
   def expiry = 1.day
 
   def get(latitude: Double, longitude: Double, radius: Double, pagination: Pagination = Pagination()): Future[(Int, Seq[Event])] = {
-    /*
-      2 digits of precision allows for 1.1km of accuracy
-      In order to prevent caches never hitting with changing location, round to that precision
-    */
-    val latRounded: Double = BigDecimal(latitude).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-    val longRounded: Double = BigDecimal(longitude).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-    val radRounded: Double = radius.round // and this to the nearest whole value
+    // 2 digits of precision allows for 1.1km of accuracy
+    // In order to prevent caches never hitting with changing location, round to that precision
+    val (lat, long) = GeoPoint.round(latitude, longitude, 2)
+    val rad: Double = radius.round // and this to the nearest whole value
     
     // Get the events in chunks
     val chunkSize = 10
@@ -32,7 +30,7 @@ object GeoUpcoming extends ExternalApiCache {
     val maxPage = minPage + chunksPerPage - 1
 
     val urls = (minPage to maxPage).map { page =>
-      UrlBuilder.geo_getEvents(latRounded, longRounded, radRounded, Pagination(limit = chunkSize, page = page))
+      UrlBuilder.geo_getEvents(lat, long, rad, Pagination(limit = chunkSize, page = page))
     }
 
     ExternalApiCall.getPar[EventList](urls).map { r =>

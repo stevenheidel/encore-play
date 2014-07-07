@@ -31,4 +31,11 @@ object GeoPoint {
   def nearFilter[T](seq: Seq[T], reference: GeoPoint, distance: Double)(implicit getPoint: T => GeoPoint): Seq[T] = {
     seq.filter(getPoint(_).distanceTo(reference) < distance)
   }
+
+  def round(latitude: Double, longitude: Double, decimals: Int): (Double, Double) = {
+    val latRounded: Double = BigDecimal(latitude).setScale(decimals, BigDecimal.RoundingMode.HALF_UP).toDouble
+    val longRounded: Double = BigDecimal(longitude).setScale(decimals, BigDecimal.RoundingMode.HALF_UP).toDouble
+
+    (latRounded, longRounded)
+  }
 }
