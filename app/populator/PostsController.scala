@@ -3,36 +3,39 @@ package populator
 import play.api._
 import play.api.mvc._
 import play.api.libs.json._
+import populator.actors._
+import akka.actor._
+import play.api.Play.current
+import play.api.libs.concurrent.Akka
+import akka.pattern.ask
+import scala.concurrent.duration._
+import akka.util.Timeout
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 object PostsController extends Controller {
+
+  val actor = Akka.system.actorOf(Props[Populator])
+  implicit val timeout: Timeout = Timeout(1.seconds)
 
   // UNIMPLEMENTED
   def getList(event_id: Long) = Action {
     Ok(Json.parse("""{"posts": []}"""))
   }
 
-  // UNIMPLEMENTED
   def startPopulating(event_id: Long) = Action {
-    Ok(Json.parse("""{"response": "success"}"""))
+    actor ! Start(event_id)
+    Ok(Json.obj("response" -> "success"))
   }
 
-  // UNIMPLEMENTED
-  def checkPopulating(event_id: Long) = Action {
-    Ok(Json.parse("""{"response": "false"}"""))
+  def checkPopulating(event_id: Long) = Action.async {
+    ask(actor, Check(event_id)).mapTo[Boolean].map { response =>
+      Ok(Json.obj("response" -> response.toString))
+    }
   }
 
   // DELETE WHEN FINISHED
-  def test = Action.async {
-    import play.api.libs.concurrent.Execution.Implicits.defaultContext
-    import lastfm.actions.SingleEvent
-    import populator.algorithms._
-
-    for {
-      event <- SingleEvent.get(1920146)
-    } yield {
-      Instagrams.populate(event)
-      Ok("Done.")
-    }
+  def test = Action {
+    Ok("Test")
   }
 
 }
