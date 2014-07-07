@@ -6,8 +6,8 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
 case class Pagination(
-  next_url: String,
-  next_max_id: String
+  next_url: Option[String],
+  next_max_id: Option[String]
 )
 
 object Pagination {

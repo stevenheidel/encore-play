@@ -13,8 +13,10 @@ import scala.concurrent.Future
 
 object TicketsUrl extends ExternalApiCache {
 
-  def collection = db.collection[JSONCollection]("seatgeek_url")
+  def collection = db.collection[JSONCollection]("cache_seatgeek_url")
   def expiry = 1.day
+
+  val key = Play.current.configuration.getString("seatgeek.aid").get
 
   // retrieved from https://github.com/backchatio/scala-inflector/blob/master/src/main/scala/Inflector.scala
   private def dasherize(word: String): String = {
@@ -29,11 +31,11 @@ object TicketsUrl extends ExternalApiCache {
   }
 
   def get(event: Event): Future[Option[String]] = {
-    val path = "http://api.seatgeek.com/2/events" ? ("aid" -> 10708) & 
+    val url = "http://api.seatgeek.com/2/events" ? ("aid" -> key) & 
                 ("taxonomies.name" -> "concert") & ("performers.slug" -> dasherize(event.headliner)) &
                 ("datetime_local" -> event.justDate)
     
-    ExternalApiCall.get[JsValue](path).map { json =>
+    ExternalApiCall.get[JsValue](url).map { json =>
       ((json \ "events")(0) \ "url").asOpt[String]
     }
   }

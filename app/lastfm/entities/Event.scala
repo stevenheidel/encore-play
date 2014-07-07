@@ -9,6 +9,9 @@ import lastfm.traits.HasImages
 import utils.GeoPoint
 import scala.language.implicitConversions
 import com.github.nscala_time.time.Imports._
+import lastfm.google.TimeZone
+import scala.concurrent.Future
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 case class Event(
   id: Long, 
@@ -27,18 +30,26 @@ case class Event(
   tickets: Option[String], 
   cancelled: Boolean
 ) extends HasImages {
+  // Convert the string to a DateTime, careful though! unknown timezone
+  private val localDate: DateTime = {
+    val readFormat = DateTimeFormat.forPattern("EEE, d MMM yyyy HH:mm:ss z")
+    readFormat.parseDateTime(startDate + " UTC") // Pretend that it's in UTC
+  }
+
   // Returns local date in format: "2014-04-07"
   val justDate: String = {
-    val readFormat = new java.text.SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss")
-    val writeFormat = new java.text.SimpleDateFormat("yyyy-MM-dd")
-
-    val date = readFormat.parse(startDate)
-    writeFormat.format(date)
+    val writeFormat = DateTimeFormat.forPattern("yyyy-MM-dd")
+    writeFormat.print(localDate)
   }
 
   // Takes a date in ISO 8601 and determines if it is the same day
   def isToday(date: String) = {
     justDate == date.take("yyyy-MM-dd".length)
+  }
+
+  // Reconcile the correct start time with Google based on latitude and longitude
+  lazy val utcStartTime: Future[DateTime] = TimeZone.get(venue.get.lat.get, venue.get.long.get).map { offset =>
+    new DateTime(localDate) - offset.seconds
   }
 
   // Lineup should have the headliner first, then everyone else with no duplicates

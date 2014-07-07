@@ -24,6 +24,12 @@ object UrlBuilder {
     constructUrl("locations/search", params)
   }
 
+  def location_recent_media(location_id: String, min_timestamp: Long, max_timestamp: Long, max_id: Option[String]): Uri = {
+    val params = Seq("min_timestamp" -> min_timestamp, "max_timestamp" -> max_timestamp, "max_id" -> max_id)
+
+    constructUrl(s"locations/$location_id/media/recent", params)
+  }
+
   private def constructUrl(method: String, params: Seq[Tuple2[String, Any]]): Uri = {
     val allParams = baseParams ++ params
 

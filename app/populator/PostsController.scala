@@ -25,9 +25,13 @@ object PostsController extends Controller {
   def test = Action.async {
     import play.api.libs.concurrent.Execution.Implicits.defaultContext
     import lastfm.actions.SingleEvent
+    import populator.algorithms._
 
-    SingleEvent.get(3839481).flatMap { e =>
-      Populator.instagramLocationsForVenue(e.venue.get).map(x => Ok(x.toString))
+    for {
+      event <- SingleEvent.get(1920146)
+    } yield {
+      Instagrams.populate(event)
+      Ok("Done.")
     }
   }
 
