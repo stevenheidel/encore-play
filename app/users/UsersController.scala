@@ -38,16 +38,18 @@ object UsersController extends Controller {
     }
   }
 
-  def listEvents(facebook_id: Long) = Action.async {
+  def listEvents(facebook_id: Long, date: String) = Action.async {
     User.get(facebook_id).flatMap { user =>
       val eventIds = user.events.getOrElse(Seq())
       val eventsF = Lastfm.getEvents(eventIds)
 
       eventsF.map { events =>
+        val (past, future) = events.partition(_.isFuture(date))
+
         Ok(Json.obj(
           "events" -> Json.obj(
-            "past" -> JsArray(),
-            "future" -> Json.toJson(events)
+            "past" -> Json.toJson(past),
+            "future" -> Json.toJson(future)
           )
         ))
       }

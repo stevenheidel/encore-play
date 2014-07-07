@@ -47,6 +47,10 @@ case class Event(
     justDate == date.take("yyyy-MM-dd".length)
   }
 
+  def isFuture(date: String) = {
+    justDate >= date.take("yyyy-MM-dd".length)
+  }
+
   // Reconcile the correct start time with Google based on latitude and longitude
   lazy val utcStartTime: Future[DateTime] = TimeZone.get(venue.get.lat.get, venue.get.long.get).map { offset =>
     new DateTime(localDate) - offset.seconds
