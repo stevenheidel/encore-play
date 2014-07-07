@@ -17,9 +17,12 @@ object PostsController extends Controller {
   val actor = Akka.system.actorOf(Props[Populator])
   implicit val timeout: Timeout = Timeout(1.seconds)
 
-  // UNIMPLEMENTED
-  def getList(event_id: Long) = Action {
-    Ok(Json.parse("""{"posts": []}"""))
+  def getList(event_id: Long) = Action.async {
+    populator.models.Base.findAll(event_id).map { posts =>
+      Ok(Json.obj(
+        "posts" -> Json.toJson(posts)
+      ))
+    }
   }
 
   def startPopulating(event_id: Long) = Action {

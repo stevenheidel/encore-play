@@ -21,21 +21,19 @@ object Instagrams {
   }
 
   def recurse(event: Event, maxId: Option[String] = None)(location: Location): Unit = {
-    var continue = true
-
     val f = for {
       start <- event.utcStartTime
       end = start + 6.hours // Arbitrarily say event lasted 6 hours
       response <- LocationRecentMedia.get(location, start, end, maxId)
     } yield {
       response.media.map { m =>
-        // Save to database, if duplicate found then continue = false
-        println(s"<img src='${m.image_url}' />")
+        // Save to database
+        populator.models.Base.insert(event.id, m)
       }
 
       // If there are more responses to get, then go again with next max id
       val nextMaxId = response.pagination.next_max_id
-      if (continue && nextMaxId.isDefined) {
+      if (nextMaxId.isDefined) {
         recurse(event, nextMaxId)(location)
       }
     }

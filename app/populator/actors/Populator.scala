@@ -21,7 +21,7 @@ class Populator extends Actor {
 
       SingleEvent.get(eventId).map(Instagrams.populate) onComplete {
         case Success(_) => instagram -= eventId
-        case Failure(e) => throw e
+        case Failure(e) => instagram -= eventId; throw e
       }
     }
 
