@@ -104,7 +104,7 @@ object User {
     collection.find(query).one[User].map(_.isDefined)
   }
 
-  def addEvent(facebook_id: Long, event_id: Long): Future[User] = {
+  def addEvent(facebook_id: Long, event_id: Long): Future[LastError] = {
     val query = Json.obj("facebook_id" -> facebook_id)
     val update = Json.obj(
       "$addToSet" -> Json.obj(
@@ -112,10 +112,10 @@ object User {
       )
     )
 
-    collection.update(query, update, upsert = true).flatMap(_ => get(facebook_id))
+    collection.update(query, update, upsert = true)
   }
 
-  def removeEvent(facebook_id: Long, event_id: Long): Future[User] = {
+  def removeEvent(facebook_id: Long, event_id: Long): Future[LastError] = {
     val query = Json.obj("facebook_id" -> facebook_id)
     val update = Json.obj(
       "$pull" -> Json.obj(
@@ -123,6 +123,6 @@ object User {
       )
     )
 
-    collection.update(query, update, upsert = true).flatMap(_ => get(facebook_id))
+    collection.update(query, update, upsert = true)
   }
 }
