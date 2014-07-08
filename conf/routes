@@ -14,7 +14,7 @@ GET     /api/v2/events/:event_id.json               lastfm.EventsController.sing
 GET     /api/v2/events/:event_id/seatgeek_url.json  lastfm.EventsController.seatgeekUrl(event_id: Long)
 
 # Posts
-GET     /api/v2/events/:event_id/posts.json         populator.PostsController.getList(event_id: Long)
+GET     /api/v2/events/:event_id/posts              populator.PostsController.getList(event_id: Long)
 POST    /api/v2/events/:event_id/populate.json      populator.PostsController.startPopulating(event_id: Long)
 GET     /api/v2/events/:event_id/populating.json    populator.PostsController.checkPopulating(event_id: Long)
 
