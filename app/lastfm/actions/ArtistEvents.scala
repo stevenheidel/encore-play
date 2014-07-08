@@ -58,6 +58,9 @@ object ArtistPastEvents extends ExternalApiCache with ArtistEvents {
   def collection = db.collection[JSONCollection]("cache_lastfm_artist_past")
   def expiry = 1.day
 
+  // Past event requests are slow
+  override val timeout = 15.seconds
+
   // Past events with ampersands in artist name cause problems
   override val jsonConverter = XmlConvert.convert _
 
