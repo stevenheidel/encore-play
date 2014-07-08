@@ -39,8 +39,8 @@ object UsersController extends Controller {
   }
 
   def listEvents(facebook_id: Long, date: String) = Action.async {
-    User.get(facebook_id).flatMap { user =>
-      val eventIds = user.events.getOrElse(Seq())
+    User.getOpt(facebook_id).flatMap { user =>
+      val eventIds = user.flatMap(_.events).getOrElse(Seq())
       val eventsF = Lastfm.getEvents(eventIds)
 
       eventsF.map { events =>
