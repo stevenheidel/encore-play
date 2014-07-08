@@ -56,8 +56,9 @@ object UsersController extends Controller {
     }
   }
 
-  def addEvent(facebook_id: Long) = Action.async(parse.json) { request =>
-    val lastfm_id = (request.body \ "lastfm_id").as[String].toLong
+  def addEvent(facebook_id: Long) = Action.async { request =>
+    Logger.debug(request.body.toString)
+    val lastfm_id = (Json.parse(request.body.toString) \ "lastfm_id").as[String].toLong
 
     User.addEvent(facebook_id, lastfm_id).map { lastError =>
       Ok(Json.obj("response" -> "success"))
