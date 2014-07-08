@@ -32,13 +32,13 @@ case class Event(
 ) extends HasImages {
   // Convert the string to a DateTime, careful though! unknown timezone
   private val localDate: DateTime = {
-    val readFormat = DateTimeFormat.forPattern("EEE, d MMM yyyy HH:mm:ss z")
+    val readFormat = DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss z").withLocale(java.util.Locale.ENGLISH)
     readFormat.parseDateTime(startDate + " UTC") // Pretend that it's in UTC
   }
 
   // Returns local date in format: "2014-04-07"
   val justDate: String = {
-    val writeFormat = DateTimeFormat.forPattern("yyyy-MM-dd")
+    val writeFormat = DateTimeFormat.forPattern("yyyy-MM-dd").withLocale(java.util.Locale.ENGLISH)
     writeFormat.print(localDate)
   }
 
