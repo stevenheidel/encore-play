@@ -112,7 +112,7 @@ object User {
       )
     )
 
-    collection.update(query, update).flatMap(_ => get(facebook_id))
+    collection.update(query, update, upsert = true).flatMap(_ => get(facebook_id))
   }
 
   def removeEvent(facebook_id: Long, event_id: Long): Future[User] = {
@@ -123,6 +123,6 @@ object User {
       )
     )
 
-    collection.update(query, update).flatMap(_ => get(facebook_id))
+    collection.update(query, update, upsert = true).flatMap(_ => get(facebook_id))
   }
 }
