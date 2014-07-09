@@ -17,7 +17,7 @@ import play.api.Play.current
 // Reading and writing from request
 object JsonUser {
   implicit val userReads: Reads[User] = (
-    (__ \ "name").read[String] ~
+    (__ \ "name").readNullable[String] ~
     ((__ \ "facebook_id").read[Long] orElse (__ \ "facebook_id").read[String].map(_.toLong)) ~
     (__ \ "oauth").readNullable[String] ~
     (__ \ "expiration_date").readNullable[String] ~
@@ -39,8 +39,10 @@ object JsonUser {
   }
 }
 
+// The only thing in User we can know for certain is facebook_id,
+// if they haven't been logged in properly
 case class User(
-  name: String,
+  name: Option[String],
   facebook_id: Long,
   oauth: Option[String],
   expiration_date: Option[String],
