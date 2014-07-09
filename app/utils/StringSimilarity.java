@@ -7,6 +7,10 @@ import java.util.ArrayList;
 public class StringSimilarity {
    /** @return lexical similarity value in the range [0,1] */
    public static double compareStrings(String str1, String str2) {
+      // Case with empty strings
+      if (str1.length() == 0 || str2.length() == 0)
+        return 0;
+
        ArrayList pairs1 = wordLetterPairs(str1.toUpperCase());
        ArrayList pairs2 = wordLetterPairs(str2.toUpperCase());
        int intersection = 0;
