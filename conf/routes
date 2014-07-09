@@ -33,6 +33,8 @@ GET     /ping                                       admin.PingController.ping
 
 GET     /api/v2/posts/test.json populator.PostsController.test
 
+GET /favicon.ico controllers.Assets.at(path="/public", file="images/favicon.ico")
+
 # API V1 Fallback
 #GET     /api/v2/*path                         admin.RedirectController.redirect(path: String)
 #POST     /api/v2/*path                         admin.RedirectController.redirect(path: String)
