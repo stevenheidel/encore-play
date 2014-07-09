@@ -22,6 +22,9 @@ case class ResponseCodeException(url: Uri, code: Int) extends
 case class JsonParseException(url: Uri, message: String) extends 
   RuntimeException(s"Could not parse JSON from '$url' because: $message")
 
+case class TimedOutException(url: Uri, timeout: Period) extends
+  RuntimeException(s"Request to $url has timed out after $timeout")
+
 // TODO: Instead of being a trait, this should have case class Options for the various settings
 // TODO: Add inspection of X-ratelimit-remaining header
 
@@ -105,7 +108,9 @@ trait ExternalApiCache {
       response.map(r => r.status match {
         case 200 =>
         case x => throw ResponseCodeException(url, x)
-      })
+      }) recover {
+        case t: TimeoutException => throw TimedOutException(url, timeout)
+      }
 
       // Parse the response as JSON
       response.map(jsonConverter)
