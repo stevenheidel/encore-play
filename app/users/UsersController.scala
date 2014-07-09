@@ -54,7 +54,7 @@ object UsersController extends Controller {
       val eventsF = Lastfm.getEvents(eventIds)
 
       eventsF.map { events =>
-        val (past, future) = events.partition(_.isFuture(date))
+        val (future, past) = events.partition(_.isFuture(date))
 
         Ok(Json.obj(
           "events" -> Json.obj(
