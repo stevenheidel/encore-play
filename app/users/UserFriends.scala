@@ -32,9 +32,15 @@ object UserFriends {
   ))
 
   def update(facebook_id: Long, event_id: Long, friend_ids: Seq[Long]): Future[UserFriends] = {
+    val query = Json.obj("facebook_id" -> facebook_id, "event_id" -> event_id)
+    val update = Json.obj(
+      "$addToSet" -> Json.obj(
+        "friend_ids" -> Json.obj("$each" -> friend_ids)
+      )
+    )
     val userFriends = UserFriends(facebook_id, event_id, friend_ids)
 
-    collection.insert(userFriends).map { lastError =>
+    collection.update(query, update, upsert = true).map { lastError =>
       userFriends
     }
   }
