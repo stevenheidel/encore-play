@@ -12,7 +12,7 @@ object UsersController extends Controller {
 
   // Takes the request turns it into JSON
   // TODO: This should be better, I assumed JSON to start with
-  def convertFormUrlEncodedToJson(implicit request: Request[AnyContent]) = {
+  def convertFormUrlEncodedToJson(implicit request: Request[AnyContent]): JsValue = {
     Logger.debug(request.body.toString)
     val json = Json.toJson(request.body.asFormUrlEncoded.get.map {
       case (k,v) => (k, v.head)
@@ -86,9 +86,28 @@ object UsersController extends Controller {
 
   // FRIENDS
 
+  // Takes the request turns it into JSON
+  // TODO: This should be better, I assumed JSON to start with
+  // This is for the list of friends
+  def convertFormUrlEncodedToFriendsJson(implicit request: Request[AnyContent]): JsValue = {
+    Logger.debug(request.body.toString)
+    val map = request.body.asFormUrlEncoded.get
+    val facebook_ids = map("friends[][facebook_id]")
+    val names = map("friends[][name]")
+
+    val pairs = facebook_ids.zip(names)
+    val objs = pairs.map {
+      case (id, name) => Json.obj("facebook_id" -> id, "name" -> name)
+    }
+    val json = Json.toJson(objs)
+
+    Logger.debug(json.toString)
+    json
+  }  
+
   def addFriends(facebook_id: Long, event_id: Long) = Action.async { implicit request =>
-    val json = convertFormUrlEncodedToJson
-    val rawFriends = (json \ "friends").as[Seq[User]]
+    val json = convertFormUrlEncodedToFriendsJson
+    val rawFriends = json.as[Seq[User]]
 
     // Add all to database if not there already
     val friends = Future.sequence(rawFriends.map(User.upsert(_)))
