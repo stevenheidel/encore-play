@@ -122,11 +122,14 @@ object UsersController extends Controller {
   }
 
   def listFriends(facebook_id: Long, event_id: Long) = Action.async {
-    UserFriends.get(facebook_id, event_id).flatMap { userFriends =>
-      val friends = Future.sequence(userFriends.friend_ids.map(User.get(_)))
+    UserFriends.get(facebook_id, event_id).flatMap { 
+      case None => Future(Ok(Json.arr()))
+      case Some(userFriends) => {
+        val friends = Future.sequence(userFriends.friend_ids.map(User.get(_)))
 
-      friends.map { fs =>
-        Ok(Json.toJson(fs))
+        friends.map { fs =>
+          Ok(Json.toJson(fs))
+        }
       }
     }
   }

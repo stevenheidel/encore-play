@@ -25,6 +25,12 @@ object UserFriends {
 
   def collection = ReactiveMongoPlugin.db.collection[JSONCollection]("user_friends")
 
+  // Ensure only 1 set of users per event per user
+  collection.indexesManager.ensure(Index(
+    key = Seq("facebook_id" -> IndexType.Ascending, "event_id" -> IndexType.Ascending),
+    unique = true
+  ))
+
   def update(facebook_id: Long, event_id: Long, friend_ids: Seq[Long]): Future[UserFriends] = {
     val userFriends = UserFriends(facebook_id, event_id, friend_ids)
 
@@ -33,9 +39,9 @@ object UserFriends {
     }
   }
 
-  def get(facebook_id: Long, event_id: Long): Future[UserFriends] = {
+  def get(facebook_id: Long, event_id: Long): Future[Option[UserFriends]] = {
     val query = Json.obj("facebook_id" -> facebook_id, "event_id" -> event_id)
 
-    collection.find(query).one[UserFriends].map(_.get)
+    collection.find(query).one[UserFriends]
   }
 }
