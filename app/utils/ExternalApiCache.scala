@@ -97,7 +97,7 @@ trait ExternalApiCache {
       // Get only the first matching document and uncompress it
       collection.find(query).one[JsValue].map(_.map { x =>
         val cString = (x \ "response").toString()
-        val uString = StringCompression.uncompress(cString)
+        val uString = GZipHelper.inflate(cString)
         Json.parse(uString)
       })
     }
@@ -119,7 +119,7 @@ trait ExternalApiCache {
     private def saveToCache(url: Uri, response: JsValue): Unit = {
       val document = Json.obj(
         "url" -> url.toString(),
-        "response" -> StringCompression.compress(response.toString()),
+        "response" -> GZipHelper.deflate(response.toString()),
         "expiresAt" -> Json.obj(
           "$date" -> (DateTime.now + expiry).getMillis
         )
