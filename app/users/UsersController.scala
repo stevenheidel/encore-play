@@ -59,7 +59,8 @@ object UsersController extends Controller {
 
         Ok(Json.obj(
           "events" -> Json.obj(
-            "past" -> Json.toJson(past),
+            // Show past events most recent first
+            "past" -> Json.toJson(past.reverse),
             "future" -> Json.toJson(future)
           )
         ))
