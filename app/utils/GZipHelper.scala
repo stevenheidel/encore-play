@@ -21,6 +21,9 @@ object GZipHelper {
     val bytes = Base64.decodeBase64(deflatedTxt)
     val zipInputStream = new GZIPInputStream(new ByteArrayInputStream(bytes))
     
-    IOUtils.toString(zipInputStream)
+    val result = IOUtils.toString(zipInputStream)
+    IOUtils.closeQuietly(zipInputStream)
+
+    result
   }
 }
