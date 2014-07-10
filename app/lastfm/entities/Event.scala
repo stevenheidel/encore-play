@@ -31,7 +31,7 @@ case class Event(
   cancelled: Boolean
 ) extends HasImages {
   // Convert the string to a DateTime, careful though! unknown timezone
-  private val localDate: DateTime = {
+  val localDate: DateTime = {
     val readFormat = DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss z").withLocale(java.util.Locale.ENGLISH)
     readFormat.parseDateTime(startDate + " UTC") // Pretend that it's in UTC
   }

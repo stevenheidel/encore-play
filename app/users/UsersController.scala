@@ -7,6 +7,7 @@ import play.api.libs.json._
 import scala.concurrent.Future
 import lastfm.Lastfm
 import users.JsonUser._
+import com.github.nscala_time.time.Imports._
 
 object UsersController extends Controller {
 
@@ -54,7 +55,7 @@ object UsersController extends Controller {
       val eventsF = Lastfm.getEvents(eventIds)
 
       eventsF.map { events =>
-        val (future, past) = events.partition(_.isFuture(date))
+        val (future, past) = events.sortBy(_.localDate).partition(_.isFuture(date))
 
         Ok(Json.obj(
           "events" -> Json.obj(
