@@ -71,8 +71,6 @@ trait ExternalApiCache {
         case Some(x) => Future.successful(x)
       }
 
-      json.map { j => Logger.debug(j.toString) }
-
       // Attempt to validate the response
       json.map { j =>
         val obj = j.validate[T] match {
@@ -98,9 +96,7 @@ trait ExternalApiCache {
 
       // Get only the first matching document and uncompress it
       collection.find(query).one[JsValue].map(_.map { x =>
-        Logger.debug(x.toString)
         val cString = (x \ "response").toString()
-        Logger.debug(cString)
         val uString = GZipHelper.inflate(cString)
         Json.parse(uString)
       })
@@ -109,9 +105,6 @@ trait ExternalApiCache {
     private def getResponse(url: Uri): Future[JsValue] = {
       val response = WS.url(url.toString()).withRequestTimeout(timeout.millis.toInt).get()
 
-      Logger.debug("===Response===")
-      response.map(r => Logger.debug(r.toString))
-
       response.map(r => r.status match {
         case 200 =>
         case x => throw ResponseCodeException(url, x)
@@ -119,15 +112,11 @@ trait ExternalApiCache {
         case t: TimeoutException => throw TimedOutException(url, timeout)
       }
 
-      Logger.debug("===Response===")
-      response.map(r => Logger.debug(r.toString))
-
       // Parse the response as JSON
       response.map(jsonConverter)
     }
 
     private def saveToCache(url: Uri, response: JsValue): Unit = {
-      Logger.debug(response.toString)
       val document = Json.obj(
         "url" -> url.toString(),
         "response" -> GZipHelper.deflate(response.toString()),
@@ -135,7 +124,6 @@ trait ExternalApiCache {
           "$date" -> (DateTime.now + expiry).getMillis
         )
       )
-      Logger.debug(document.toString)
 
       collection.insert(document) onFailure {
         case e => Logger.error(s"Could not save cache for $url to database", e)
