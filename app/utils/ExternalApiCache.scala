@@ -71,6 +71,8 @@ trait ExternalApiCache {
         case Some(x) => Future.successful(x)
       }
 
+      json.map { j => Logger.debug(j.toString) }
+
       // Attempt to validate the response
       json.map { j =>
         val obj = j.validate[T] match {
@@ -107,12 +109,18 @@ trait ExternalApiCache {
     private def getResponse(url: Uri): Future[JsValue] = {
       val response = WS.url(url.toString()).withRequestTimeout(timeout.millis.toInt).get()
 
+      Logger.debug("===Response===")
+      response.map(r => Logger.debug(r.toString))
+
       response.map(r => r.status match {
         case 200 =>
         case x => throw ResponseCodeException(url, x)
       }) recover {
         case t: TimeoutException => throw TimedOutException(url, timeout)
       }
+
+      Logger.debug("===Response===")
+      response.map(r => Logger.debug(r.toString))
 
       // Parse the response as JSON
       response.map(jsonConverter)
