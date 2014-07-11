@@ -11,13 +11,13 @@ object EventsController extends Controller {
   
   // UNIMPLEMENTED
   def pastEvents(latitude: Double, longitude: Double, radius: Double, date: String) = Action {
-    Ok(Json.parse("""{"events": []}"""))
+    Ok(Json.obj("events" -> JsArray()))
   }
 
   def todaysEvents(latitude: Double, longitude: Double, radius: Double, date: String) = Action.async {
     GeoUpcoming.get(latitude, longitude, radius * Lastfm.maxDistance).map { 
       case (total, list) => Ok(Json.obj(
-        "events" -> Json.toJson(list.takeWhile(_.isToday(date)))
+        "events" -> Json.toJson(list.filter(_.isToday(date)))
       ))
     }
   }
@@ -26,7 +26,7 @@ object EventsController extends Controller {
     GeoUpcoming.get(latitude, longitude, radius * Lastfm.maxDistance, Pagination(limit, page)).map { 
       case (total, list) => Ok(Json.obj(
         "total" -> total,
-        "events" -> Json.toJson(list.dropWhile(_.isToday(date)))
+        "events" -> Json.toJson(list.filter(_.isFuture(date)))
       ))
     }
   }
