@@ -14,11 +14,11 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 object PostsController extends Controller {
 
-  val actor = Akka.system.actorOf(Props[Populator])
+  val actor = Akka.system.actorOf(Props[BasePopulator])
   implicit val timeout: Timeout = Timeout(1.seconds)
 
   def getList(event_id: Long) = Action.async {
-    populator.models.Base.findAll(event_id).map { posts =>
+    populator.models.InstagramPhoto.findAll(event_id).map { posts =>
       Ok(Json.obj(
         "posts" -> Json.toJson(posts)
       ))

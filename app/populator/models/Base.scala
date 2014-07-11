@@ -9,32 +9,24 @@ import reactivemongo.api._
 import play.modules.reactivemongo.ReactiveMongoPlugin
 import play.modules.reactivemongo.json.collection.JSONCollection
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import populator.instagram.entities.Media
 import play.api.Play.current
 import scala.concurrent.Future
 import reactivemongo.api.indexes.{Index, IndexType}
 
-object Base {
-  def toEncoreFormat(m: Media): JsObject = {
-    Json.obj(
-      "caption" -> m.caption,
-      "image_url" -> m.image_url,
-      "user_name" -> m.user_name,
-      "user_profile_picture" -> m.user_profile_picture,
-      "type" -> "photo",
-      "link" -> m.link
-    )
-  }
+trait Base {
+  type Model
 
-  def collection: JSONCollection = ReactiveMongoPlugin.db.collection[JSONCollection]("instagrams")
+  def toEncoreFormat(m: Model): JsObject
+
+  def collection: JSONCollection
 
   collection.indexesManager.ensure(Index(
     key = Seq("link" -> IndexType.Ascending, "event_id" -> IndexType.Ascending),
     unique = true
   ))
 
-  def insert(eventId: Long, instagram: Media): Unit = {
-    val json = toEncoreFormat(instagram) ++ Json.obj("event_id" -> eventId)
+  def insert(eventId: Long, model: Model): Unit = {
+    val json = toEncoreFormat(model) ++ Json.obj("event_id" -> eventId)
 
     collection.insert(json)
   }

@@ -1,4 +1,4 @@
-package populator.algorithms
+package populator.actors
 
 import play.api._
 import lastfm.entities.{Event, Venue}
@@ -9,9 +9,28 @@ import utils.StringSimilarity
 import scala.concurrent.Future
 import populator.foursquare.SearchVenues
 import com.github.nscala_time.time.Imports._
+import akka.actor._
+import play.api.libs.concurrent.Akka
+import scala.util.{Success, Failure}
+import play.api.Play.current
 
-object Instagrams {
-  def populate(event: Event): Unit = {
+case class InstagramStart(event: Event)
+
+class InstagramPopulator extends Actor {
+  val base = Akka.system.actorOf(Props[BasePopulator])
+
+  def receive = {
+    case InstagramStart(event: Event) => {
+      val f = populate(event)
+
+      f.onComplete {
+        case Success(_) => base ! InstagramFinished(event.id)
+        case Failure(e) => base ! InstagramFinished(event.id); throw e
+      }
+    }
+  }
+
+  def populate(event: Event): Future[Unit] = {
     val locations = instagramLocationsForVenue(event.venue.get)
 
     locations.map { ls =>
@@ -28,7 +47,7 @@ object Instagrams {
     } yield {
       response.media.map { m =>
         // Save to database
-        populator.models.Base.insert(event.id, m)
+        populator.models.InstagramPhoto.insert(event.id, m)
       }
 
       // If there are more responses to get, then go again with next max id
