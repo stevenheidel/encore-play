@@ -30,12 +30,14 @@ class InstagramPopulator extends Actor {
     }
   }
 
-  def populate(event: Event): Future[Unit] = {
+  def populate(event: Event): Future[Boolean] = {
     val locations = instagramLocationsForVenue(event.venue.get)
 
     locations.map { ls =>
       // Populate each location with images
       ls.map(recurse(event))
+
+      true
     }
   }
 
