@@ -33,5 +33,5 @@ GET     /                                           admin.RedirectController.hom
 GET     /favicon.ico                                controllers.Assets.at(path="/public", file="images/favicon.png")
 GET     /ping                                       admin.PingController.ping
 
-# DELETE
+# TEMPORARY
 GET     /api/v2/posts/test.json populator.PostsController.test

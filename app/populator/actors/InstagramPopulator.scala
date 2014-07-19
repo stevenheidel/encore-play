@@ -17,15 +17,13 @@ import play.api.Play.current
 case class InstagramStart(event: Event)
 
 class InstagramPopulator extends Actor {
-  val base = Akka.system.actorOf(Props[BasePopulator])
-
   def receive = {
     case InstagramStart(event: Event) => {
       val f = populate(event)
 
       f.onComplete {
-        case Success(_) => base ! InstagramFinished(event.id)
-        case Failure(e) => base ! InstagramFinished(event.id); throw e
+        case Success(_) => sender ! InstagramFinished(event.id)
+        case Failure(e) => sender ! InstagramFinished(event.id); throw e
       }
     }
   }

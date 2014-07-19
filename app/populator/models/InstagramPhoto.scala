@@ -16,14 +16,20 @@ object InstagramPhoto extends Base {
 
   def collection: JSONCollection = ReactiveMongoPlugin.db.collection[JSONCollection]("instagrams")
 
-  def toEncoreFormat(m: Media): JsObject = {
+  def link(m: Media): String = m.link
+
+  def toDatabaseFormat(m: Media): JsObject = {
     Json.obj(
       "caption" -> m.caption,
       "image_url" -> m.image_url,
       "user_name" -> m.user_name,
-      "user_profile_picture" -> m.user_profile_picture,
-      "type" -> "photo",
-      "link" -> m.link
+      "user_profile_picture" -> m.user_profile_picture
+    )
+  }
+
+  def toEncoreFormat(j: JsObject): JsObject = {
+    j ++ Json.obj(
+      "type" -> "photo"
     )
   }
 }

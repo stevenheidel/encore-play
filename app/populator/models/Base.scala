@@ -12,11 +12,17 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.Play.current
 import scala.concurrent.Future
 import reactivemongo.api.indexes.{Index, IndexType}
+import utils.GZipHelper
 
 trait Base {
   type Model
 
-  def toEncoreFormat(m: Model): JsObject
+  // Get the unique link, used for indexing purposes
+  def link(m: Model): String
+  // Take model object and save it to database
+  def toDatabaseFormat(m: Model): JsObject
+  // Take what's been saved in database and show it to the response
+  def toEncoreFormat(j: JsObject): JsObject
 
   def collection: JSONCollection
 
@@ -26,7 +32,11 @@ trait Base {
   ))
 
   def insert(eventId: Long, model: Model): Unit = {
-    val json = toEncoreFormat(model) ++ Json.obj("event_id" -> eventId)
+    val json = Json.obj(
+      "event_id" -> eventId,
+      "link" -> link(model),
+      "media" -> GZipHelper.deflate(toDatabaseFormat(model).toString)
+    )
 
     collection.insert(json)
   }
@@ -35,7 +45,13 @@ trait Base {
     val query = Json.obj("event_id" -> eventId)
 
     collection.find(query).cursor[JsObject].collect[Seq]().map(_.map { j =>
-      j ++ Json.obj("id" -> j \ "_id" \ "$oid")
+      val cString = (j \ "media").toString
+      val uString = GZipHelper.inflate(cString)
+      // Unzip and also add id as the unique database id
+      toEncoreFormat(Json.parse(uString).as[JsObject]) ++ Json.obj(
+        "id" -> j \ "_id" \ "$oid",
+        "link" -> j \ "link"
+      )
     })
   }
 }
