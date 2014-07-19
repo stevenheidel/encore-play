@@ -14,7 +14,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 object PostsController extends Controller {
 
-  val actor = Akka.system.actorOf(Props[BasePopulator])
+  val actor = Akka.system.actorOf(Props[PopulatorActor])
   implicit val timeout: Timeout = Timeout(1.seconds)
 
   def getList(event_id: Long) = Action.async {

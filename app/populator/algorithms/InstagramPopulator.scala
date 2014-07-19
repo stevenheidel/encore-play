@@ -1,4 +1,4 @@
-package populator.actors
+package populator.algorithms
 
 import play.api._
 import lastfm.entities.{Event, Venue}
@@ -9,37 +9,19 @@ import utils.StringSimilarity
 import scala.concurrent.Future
 import populator.foursquare.SearchVenues
 import com.github.nscala_time.time.Imports._
-import akka.actor._
-import play.api.libs.concurrent.Akka
-import scala.util.{Success, Failure}
-import play.api.Play.current
 
-case class InstagramStart(event: Event)
+object InstagramPopulator {
 
-class InstagramPopulator extends Actor {
-  def receive = {
-    case InstagramStart(event: Event) => {
-      val f = populate(event)
-
-      f.onComplete {
-        case Success(_) => sender ! InstagramFinished(event.id)
-        case Failure(e) => sender ! InstagramFinished(event.id); throw e
-      }
-    }
-  }
-
-  def populate(event: Event): Future[Boolean] = {
+  def populate(event: Event): Future[Int] = {
     val locations = instagramLocationsForVenue(event.venue.get)
 
-    locations.map { ls =>
+    locations.flatMap { ls =>
       // Populate each location with images
-      ls.map(recurse(event))
-
-      true
+      Future.traverse(ls)(l => recurse(event, l)).map(_.sum)
     }
   }
 
-  def recurse(event: Event, maxId: Option[String] = None)(location: Location): Unit = {
+  def recurse(event: Event, location: Location, maxId: Option[String] = None): Future[Int] = {
     val f = for {
       start <- event.utcStartTime
       end = start + 6.hours // Arbitrarily say event lasted 6 hours
@@ -50,17 +32,19 @@ class InstagramPopulator extends Actor {
         populator.models.InstagramPhoto.insert(event.id, m)
       }
 
+      val count = response.media.length
+
       // If there are more responses to get, then go again with next max id
       val nextMaxId = response.pagination.next_max_id
       if (nextMaxId.isDefined) {
-        recurse(event, nextMaxId)(location)
+        recurse(event, location, nextMaxId).map(_ + count)
+      } else {
+        Future(count)
       }
     }
 
-    // Make sure errors don't dissapear into the abyss
-    f onFailure {
-      case x => throw x
-    }
+    // Flatten the double future structure
+    f.flatMap(identity)
   }
 
   def filterLocations(venueName: String)(locations: Seq[Location]): Seq[Location] = {
