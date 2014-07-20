@@ -36,6 +36,16 @@ case class Event(
     readFormat.parseDateTime(startDate + " UTC") // Pretend that it's in UTC
   }
 
+  // Round date to the nearest half hour
+  val roundedDate: String = {
+    def roundDateTime(t: DateTime, d: Duration): DateTime = {
+      t minus (t.getMillis - (t.getMillis.toDouble / d.getMillis).round * d.getMillis)
+    }
+
+    val writeFormat = DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss").withLocale(java.util.Locale.ENGLISH)
+    writeFormat.print(roundDateTime(localDate, 30.minutes))
+  }
+
   // Returns local date in format: "2014-04-07"
   val justDate: String = {
     val writeFormat = DateTimeFormat.forPattern("yyyy-MM-dd").withLocale(java.util.Locale.ENGLISH)
@@ -107,7 +117,7 @@ object Event {
         "lastfm_id" -> event.id.toString(),
         "name" -> event.title,
         "date" -> event.justDate,
-        "start_time" -> event.startDate,
+        "start_time" -> event.roundedDate,
         "image_url" -> event.largestImage.url,
         "lastfm_url" -> event.url,
         "tickets_url" -> event.ticketsUrl,
