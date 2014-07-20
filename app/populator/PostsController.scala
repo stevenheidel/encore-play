@@ -11,6 +11,7 @@ import akka.pattern.ask
 import scala.concurrent.duration._
 import akka.util.Timeout
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import populator.models._
 
 object PostsController extends Controller {
 
@@ -18,9 +19,14 @@ object PostsController extends Controller {
   implicit val timeout: Timeout = Timeout(1.seconds)
 
   def getList(event_id: Long) = Action.async {
-    populator.models.InstagramPhoto.findAll(event_id).map { posts =>
+    val ips = InstagramPhoto.findAll(event_id)
+    // 
+
+    for {
+      instagrams <- ips
+    } yield {
       Ok(Json.obj(
-        "posts" -> Json.toJson(posts)
+        "posts" -> Json.toJson(instagrams)
       ))
     }
   }
