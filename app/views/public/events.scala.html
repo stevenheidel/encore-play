@@ -1,5 +1,24 @@
 @(event_id: Long)
 
 @main("Encore Event") {
-  @event_id
+<div class="container" ng-controller="EventsCtrl" data-id="@event_id">
+  <div class="row eventinfo">
+    <div class="col-md-3 photo text-center">
+      <img ng-src="{{event.image_url}}" />
+    </div>
+
+    <div class="col-md-9 description">
+      <p class="artist">{{event.name}}</p>
+      <p class="venue">{{event.venue_name}}, {{event.date}}</p>
+    </div>
+  </div>
+
+  <div class="row image-gallery" infinite-scroll="loadMore()" infinite-scroll-distance="2">
+    <div class="col-md-4 photo" ng-repeat="post in posts">
+      <a href="/posts/{{post.id}}">
+        <img ng-src="{{post.image_url}}" onerror="this.onerror = '';this.style.visibility='hidden';" />
+      </a>
+    </div>
+  </div>
+</div>
 }

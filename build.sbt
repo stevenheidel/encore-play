@@ -19,6 +19,8 @@ libraryDependencies ++= Seq(
   "org.webjars" % "angularjs" % "1.2.20",
   "org.webjars" % "bootstrap" % "3.2.0",
   "org.webjars" % "html5shiv" % "3.7.2",
+  "org.webjars" % "jquery" % "2.1.1",
+  "org.webjars" % "ngInfiniteScroll" % "1.1.2",
   // Apache Commons
   "commons-io" % "commons-io" % "2.4",
   "commons-codec" % "commons-codec" % "1.9",

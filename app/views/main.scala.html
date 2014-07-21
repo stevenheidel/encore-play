@@ -1,7 +1,7 @@
 @(title: String)(content: Html)
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="encorePublic">
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
@@ -14,6 +14,10 @@
   <![endif]-->
 
   <script src="@routes.Assets.at("javascripts/public.js")"></script>
+  <script src="@routes.WebJarAssets.at(WebJarAssets.locate("jquery.min.js"))"></script>
+  <script src="@routes.WebJarAssets.at(WebJarAssets.locate("angular.min.js"))"></script>
+  <script src="@routes.WebJarAssets.at(WebJarAssets.locate("ng-infinite-scroll.min.js"))"></script>
+  <script src="@routes.Assets.at("javascripts/controllers.js")"></script>
 
   <link href="@routes.Assets.at("stylesheets/public.css")" media="all" rel="stylesheet">
 </head>
@@ -39,8 +43,6 @@
     </div>
   </div>
 
-  <div class="container">
-    @content
-  </div>
+  @content
 </body>
 </html>
