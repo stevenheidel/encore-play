@@ -1,0 +1,46 @@
+@(title: String)(content: Html)
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>@title</title>
+
+  <!--[if lt IE 9]>
+    <script src="@routes.WebJarAssets.at(WebJarAssets.locate("html5shiv.js"))"></script>
+  <![endif]-->
+
+  <script src="@routes.Assets.at("javascripts/public.js")"></script>
+
+  <link href="@routes.Assets.at("stylesheets/public.css")" media="all" rel="stylesheet">
+</head>
+<body>
+  <div class="navbar navbar-default navbar-fixed-top">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="http://encore.fm"><img alt="Encore logo" src="@routes.Assets.at("images/encore-logo.png")"></a>
+    </div>
+  </div>
+
+  <div class="container-fluid header">
+    <div class="container">
+      <div class="row text-center">
+        <div class="col-md-1 appstore">
+          <a href="http://bit.ly/getencore"><img alt="Appstore badge" src="@routes.Assets.at("images/appstore-badge.png")"></a>
+        </div>
+
+        <div class="col-md-4 col-md-offset-3 download">
+          <p>Find local concerts. Buy tickets.<br>
+          Get the show's photos and videos.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    @content
+  </div>
+</body>
+</html>

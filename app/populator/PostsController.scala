@@ -43,14 +43,4 @@ object PostsController extends Controller {
     }
   }
 
-  // DELETE WHEN FINISHED
-  def test = Action.async {
-    import populator.youtube.VideoSearch
-    import lastfm.actions.SingleEvent
-
-    SingleEvent.get(3379675).flatMap { event =>
-      VideoSearch.get(event.title, event.venue.get.city, event.localDate).map(x => Ok(x.toString))
-    }
-  }
-
 }

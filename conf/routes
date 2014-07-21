@@ -30,11 +30,11 @@ GET     /api/v2/users/:facebook_id/events/:event_id/facebook_friends.json  users
 
 # Public
 GET     /                                           admin.RedirectController.home
+GET     /events/:event_id                           admin.PublicController.events(event_id: Long)
+GET     /posts/:post_id                             admin.PublicController.posts(post_id: String)
 
 # Other
 GET     /favicon.ico                                controllers.Assets.at(path="/public", file="images/favicon.png")
 GET     /assets/*file                               controllers.Assets.at(path="/public", file)
+GET     /webjars/*file                              controllers.WebJarAssets.at(file)
 GET     /ping                                       admin.PingController.ping
-
-# TEMPORARY
-GET     /api/v2/posts/test.json populator.PostsController.test
