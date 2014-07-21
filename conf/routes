@@ -28,9 +28,12 @@ DELETE  /api/v2/users/:facebook_id/events/:event_id.json  users.UsersController.
 POST    /api/v2/users/:facebook_id/events/:event_id/add_facebook_friends.json  users.UsersController.addFriends(facebook_id: Long, event_id: Long)
 GET     /api/v2/users/:facebook_id/events/:event_id/facebook_friends.json  users.UsersController.listFriends(facebook_id: Long, event_id: Long)
 
-# Admin
+# Public
 GET     /                                           admin.RedirectController.home
+
+# Other
 GET     /favicon.ico                                controllers.Assets.at(path="/public", file="images/favicon.png")
+GET     /assets/*file                               controllers.Assets.at(path="/public", file)
 GET     /ping                                       admin.PingController.ping
 
 # TEMPORARY

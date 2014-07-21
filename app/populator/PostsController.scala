@@ -20,13 +20,14 @@ object PostsController extends Controller {
 
   def getList(event_id: Long) = Action.async {
     val ips = InstagramPhoto.findAll(event_id)
-    // 
+    val yvs = YoutubeVideo.findAll(event_id)
 
     for {
       instagrams <- ips
+      youtubes <- yvs
     } yield {
       Ok(Json.obj(
-        "posts" -> Json.toJson(instagrams)
+        "posts" -> Json.toJson(youtubes ++ instagrams)
       ))
     }
   }
@@ -43,8 +44,13 @@ object PostsController extends Controller {
   }
 
   // DELETE WHEN FINISHED
-  def test = Action {
-    Ok("Test")
+  def test = Action.async {
+    import populator.youtube.VideoSearch
+    import lastfm.actions.SingleEvent
+
+    SingleEvent.get(3379675).flatMap { event =>
+      VideoSearch.get(event.title, event.venue.get.city, event.localDate).map(x => Ok(x.toString))
+    }
   }
 
 }

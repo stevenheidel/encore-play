@@ -19,7 +19,7 @@ object TimeZone extends ExternalApiCache {
   // This value is ignored anyway, as dtcOffset isn't used. Currently set to January 29, 1991
   val timestamp = 665132523
 
-  val key = Play.current.configuration.getString("google.timezone_key").get
+  val key = Play.current.configuration.getString("google.key").get
 
   // Get offset for a latitude/longitude
   def get(latitude: Double, longitude: Double): Future[Int] = {
