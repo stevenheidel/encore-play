@@ -2,6 +2,31 @@
 
 @main("Encore Post") {
 <div class="container" ng-controller="PostsCtrl" data-id="@post_id">
+  <div class="row eventinfo">
+    <div class="col-md-3 photo text-center">
+      <a href="/events/{{post.event_id}}"><img ng-src="{{event.image_url}}" /></a>
+    </div>
 
+    <div class="col-md-9 description">
+      <p class="artist">{{event.name}}</p>
+      <p class="venue">{{event.venue_name}}, {{event.date}}</p>
+
+      <p class="seemore"><a href="/events/{{post.event_id}}">See more photos and videos from this concert</a></p>
+    </div>
+  </div>
+
+  <div class="row single-image">
+    <div ng-if="post.type == 'photo'" class="col-md-9 photo">
+      <img ng-src="{{post.image_url}}" />
+    </div>
+
+    <div ng-if="post.type == 'video'" class="col-md-9 video">
+      <object ng-attr-data="{{post.link}}" width="400" height="300" /></object>
+    </div>
+
+    <div class="col-md-3 caption">
+      <p>{{post.caption}}</p>
+    </div>
+  </div>
 </div>
 }

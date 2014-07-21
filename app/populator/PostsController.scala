@@ -18,6 +18,24 @@ object PostsController extends Controller {
   val actor = Akka.system.actorOf(Props[PopulatorActor])
   implicit val timeout: Timeout = Timeout(1.seconds)
 
+  // Single post info
+  def get(post_id: String) = Action.async {
+    val ip = InstagramPhoto.findOne(post_id)
+    val yv = YoutubeVideo.findOne(post_id)
+
+    for {
+      instagram <- ip
+      youtube <- yv
+    } yield {
+      val post = instagram orElse youtube
+
+      post match {
+        case Some(x) => Ok(x)
+        case None => NotFound
+      }
+    }
+  }
+
   def getList(event_id: Long) = Action.async {
     val ips = InstagramPhoto.findAll(event_id)
     val yvs = YoutubeVideo.findAll(event_id)

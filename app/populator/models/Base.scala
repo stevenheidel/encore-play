@@ -41,17 +41,29 @@ trait Base {
     collection.insert(json)
   }
 
+  // Takes the post as stored in the database and uncompresses it to something useful
+  def convert(j: JsValue): JsObject = {
+    val cString = (j \ "media").toString
+    val uString = GZipHelper.inflate(cString)
+
+    // Unzip and also add id as the unique database id
+    toEncoreFormat(Json.parse(uString).as[JsObject]) ++ Json.obj(
+      "id" -> j \ "_id" \ "$oid",
+      "link" -> j \ "link"
+    )
+  }
+
   def findAll(eventId: Long): Future[Seq[JsValue]] = {
     val query = Json.obj("event_id" -> eventId)
 
-    collection.find(query).cursor[JsObject].collect[Seq]().map(_.map { j =>
-      val cString = (j \ "media").toString
-      val uString = GZipHelper.inflate(cString)
-      // Unzip and also add id as the unique database id
-      toEncoreFormat(Json.parse(uString).as[JsObject]) ++ Json.obj(
-        "id" -> j \ "_id" \ "$oid",
-        "link" -> j \ "link"
-      )
+    collection.find(query).cursor[JsObject].collect[Seq]().map(_.map(convert))
+  }
+
+  def findOne(postId: String): Future[Option[JsValue]] = {
+    val query = Json.obj("_id" -> Json.obj("$oid" -> postId))
+
+    collection.find(query).one[JsValue].map(_.map { j =>
+      convert(j) ++ Json.obj("event_id" -> (j \ "event_id"))
     })
   }
 }
