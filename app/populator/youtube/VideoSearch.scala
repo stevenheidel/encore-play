@@ -17,7 +17,7 @@ object VideoSearch extends ExternalApiCache {
   val key = Play.current.configuration.getString("google.key").get
 
   def get(eventName: String, city: String, date: DateTime): Future[Seq[Video]] = {
-    val writeFormat = DateTimeFormat.forPattern("MMMM d yyyy")
+    val writeFormat = DateTimeFormat.forPattern("MMMM d yyyy").withLocale(java.util.Locale.ENGLISH)
     val formattedDate = writeFormat.print(date)
 
     val url = "https://www.googleapis.com/youtube/v3/search" ? ("key" -> key) &

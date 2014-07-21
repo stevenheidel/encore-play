@@ -20,7 +20,7 @@ object YoutubeVideo extends Base {
 
   def toDatabaseFormat(v: Video): JsObject = {
     Json.obj(
-      "caption" -> v.caption,
+      "caption" -> v.title,
       "image_url" -> v.image_url,
       "user_name" -> v.user_name
     )

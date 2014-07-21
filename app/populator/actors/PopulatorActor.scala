@@ -28,7 +28,7 @@ class PopulatorActor extends Actor {
         Future.sequence(Seq(fp, ip, yp)).onComplete {
           case Success(Seq(f, i, y)) => {
             workingSet -= eventId
-            Logger.debug(s"Found $f flickrs, $i instagrams, and $y youtubes")
+            //Logger.debug(s"Found $f flickrs, $i instagrams, and $y youtubes")
           }
           case Failure(e) => workingSet -= eventId; throw e
         }
