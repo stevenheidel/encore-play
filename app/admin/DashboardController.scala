@@ -10,13 +10,17 @@ import com.restfb.types.{User => FBUser}
 object DashboardController extends Controller {
   def updateEmail(user: User): Unit = {
     if (user.oauth.isDefined && !user.email.isDefined) {
-      val client = new DefaultFacebookClient(user.oauth.get, Play.current.configuration.getString("facebook.app_secret").get)
-      val fb: FBUser = client.fetchObject("me", classOf[FBUser]);
+      try {
+        val client = new DefaultFacebookClient(user.oauth.get, Play.current.configuration.getString("facebook.app_secret").get)
+        val fb: FBUser = client.fetchObject("me", classOf[FBUser]);
 
-      val email = fb.getEmail()
-      val updatedUser = user.copy(email = Some(email))
+        val email = fb.getEmail()
+        val updatedUser = user.copy(email = Some(email))
 
-      User.update(updatedUser)
+        User.update(updatedUser)
+      } catch {
+        case _: Throwable => 
+      }
     }
   }
 
