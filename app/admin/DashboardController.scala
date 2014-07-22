@@ -12,7 +12,7 @@ object DashboardController extends Controller {
   def updateEmail(user: User): Unit = Future {
     if (user.oauth.isDefined && !user.email.isDefined) {
       val client = new DefaultFacebookClient(user.oauth.get, Play.current.configuration.getString("facebook.app_secret").get)
-      val fb: FBUser = client.fetchObject("me", classOf[FBUser]);
+      val fb: FBUser = client.fetchObject("me", classOf[FBUser])
 
       val email = fb.getEmail()
       val updatedUser = user.copy(email = Some(email))

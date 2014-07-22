@@ -47,10 +47,10 @@ trait Base {
     val uString = GZipHelper.inflate(cString)
 
     // Unzip and also add id as the unique database id
-    toEncoreFormat(Json.parse(uString).as[JsObject]) ++ Json.obj(
+    toEncoreFormat(Json.parse(uString).as[JsObject] ++ Json.obj(
       "id" -> j \ "_id" \ "$oid",
       "link" -> j \ "link"
-    )
+    ))
   }
 
   def findAll(eventId: Long): Future[Seq[JsValue]] = {

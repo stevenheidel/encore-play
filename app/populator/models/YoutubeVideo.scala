@@ -29,6 +29,7 @@ object YoutubeVideo extends Base {
   def toEncoreFormat(j: JsObject): JsObject = {
     j ++ Json.obj(
       "user_profile_picture" -> "http://on.encore.fm/assets/images/applogo.png",
+      "youtube_link" -> j \ "link",
       "type" -> "video"
     )
   }
