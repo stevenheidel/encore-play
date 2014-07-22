@@ -6,21 +6,18 @@ import users.User
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.restfb.DefaultFacebookClient
 import com.restfb.types.{User => FBUser}
+import scala.concurrent.Future
 
 object DashboardController extends Controller {
-  def updateEmail(user: User): Unit = {
+  def updateEmail(user: User): Unit = Future {
     if (user.oauth.isDefined && !user.email.isDefined) {
-      try {
-        val client = new DefaultFacebookClient(user.oauth.get, Play.current.configuration.getString("facebook.app_secret").get)
-        val fb: FBUser = client.fetchObject("me", classOf[FBUser]);
+      val client = new DefaultFacebookClient(user.oauth.get, Play.current.configuration.getString("facebook.app_secret").get)
+      val fb: FBUser = client.fetchObject("me", classOf[FBUser]);
 
-        val email = fb.getEmail()
-        val updatedUser = user.copy(email = Some(email))
+      val email = fb.getEmail()
+      val updatedUser = user.copy(email = Some(email))
 
-        User.update(updatedUser)
-      } catch {
-        case _: Throwable => 
-      }
+      User.update(updatedUser)
     }
   }
 
