@@ -34,8 +34,16 @@ GET     /                                           admin.RedirectController.hom
 GET     /events/:event_id                           admin.PublicController.events(event_id: Long)
 GET     /posts/:post_id                             admin.PublicController.posts(post_id: String)
 
-# Other
+# Resources
 GET     /favicon.ico                                controllers.Assets.at(path="/public", file="images/favicon.png")
 GET     /assets/*file                               controllers.Assets.at(path="/public", file)
 GET     /webjars/*file                              controllers.WebJarAssets.at(file)
+
+# Redirect
+GET     /api/v1/*path                               admin.RedirectController.deprecated(path: String)
+POST    /api/v1/*path                               admin.RedirectController.deprecated(path: String)
+PATCH   /api/v1/*path                               admin.RedirectController.deprecated(path: String)
+DELETE  /api/v1/*path                               admin.RedirectController.deprecated(path: String)
+
+# Other
 GET     /ping                                       admin.PingController.ping
