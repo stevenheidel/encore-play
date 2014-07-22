@@ -33,7 +33,7 @@ public class StringSimilarity {
    private static ArrayList wordLetterPairs(String str) {
        ArrayList<String> allPairs = new ArrayList<String>();
        // Tokenize the string and put the tokens/words into an array
-       String[] words = str.split("\\s");
+       String[] words = str.split("\\s+");
        // For each word
        for (int w=0; w < words.length; w++) {
            // Find the pairs of characters
