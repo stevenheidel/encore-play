@@ -26,7 +26,7 @@ object DashboardController extends Controller {
       // Update the emails
       users.map(updateEmail)
 
-      Ok(views.html.dashboard.user_list(users))
+      Ok(views.html.dashboard.user_list(users.reverse))
     }
   }
 }

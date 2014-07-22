@@ -20,14 +20,16 @@ object PostsController extends Controller {
 
   // Single post info
   def get(post_id: String) = Action.async {
+    val fp = FlickrPhoto.findOne(post_id)
     val ip = InstagramPhoto.findOne(post_id)
     val yv = YoutubeVideo.findOne(post_id)
 
     for {
+      flickr <- fp
       instagram <- ip
       youtube <- yv
     } yield {
-      val post = instagram orElse youtube
+      val post = flickr orElse instagram orElse youtube
 
       post match {
         case Some(x) => Ok(x)
@@ -37,15 +39,17 @@ object PostsController extends Controller {
   }
 
   def getList(event_id: Long) = Action.async {
+    val fps = FlickrPhoto.findAll(event_id)
     val ips = InstagramPhoto.findAll(event_id)
     val yvs = YoutubeVideo.findAll(event_id)
 
     for {
+      flickrs <- fps
       instagrams <- ips
       youtubes <- yvs
     } yield {
       Ok(Json.obj(
-        "posts" -> Json.toJson(youtubes ++ instagrams)
+        "posts" -> Json.toJson(youtubes ++ flickrs ++ instagrams)
       ))
     }
   }
