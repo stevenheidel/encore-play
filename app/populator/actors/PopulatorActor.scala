@@ -20,6 +20,8 @@ class PopulatorActor extends Actor {
 
   def receive = {
     case Start(eventId) => {
+      workingSet += eventId
+
       SingleEvent.get(eventId).map { e =>
         val fp = FlickrPopulator.populate(e)
         val ip = InstagramPopulator.populate(e)
