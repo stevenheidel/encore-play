@@ -45,5 +45,6 @@ POST    /api/v1/*path                               admin.RedirectController.dep
 PATCH   /api/v1/*path                               admin.RedirectController.deprecated(path: String)
 DELETE  /api/v1/*path                               admin.RedirectController.deprecated(path: String)
 
-# Other
+# Admin
+GET     /private/dashboard                          admin.DashboardController.userList
 GET     /ping                                       admin.PingController.ping

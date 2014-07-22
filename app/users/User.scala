@@ -127,4 +127,10 @@ object User {
 
     collection.update(query, update, upsert = true)
   }
+
+  def all(): Future[Seq[User]] = {
+    val query = Json.obj()
+
+    collection.find(query).cursor[User].collect[Seq]()
+  }
 }

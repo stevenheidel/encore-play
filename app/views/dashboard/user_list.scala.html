@@ -1,0 +1,36 @@
+@import users.User
+
+@(users: Seq[User])
+
+@main("Dashboard") {
+<div class="container">
+  <div class="row table-responsive" style="background: white; margin-top: 20px; padding: 0 20px">
+    <h1>List of Facebook Users</h1>
+    <p>Green highlighting represents actual users</p>
+
+    <p>Actual users: <strong>@users.count(_.oauth.isDefined)</strong></p>
+    <p>Invites: <strong>@users.count(!_.oauth.isDefined)</strong></p>
+
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Facebook Profile</th>
+          <th>Number of Events</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(user <- users) {
+        <tr @if(user.oauth.isDefined) { class="success" }>
+          <td>@user.name</td>
+          <td>@user.email</td>
+          <td><a href="http://facebook.com/@user.facebook_id">@user.facebook_id</a></td>
+          <td>@user.events.map(_.length).getOrElse("-")</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+}

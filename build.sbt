@@ -14,6 +14,7 @@ libraryDependencies ++= Seq(
   "com.github.nscala-time" %% "nscala-time" % "1.2.0",
   //"com.wordnik" %% "swagger-play2" % "1.3.6",
   "net.liftweb" % "lift-json_2.11" % "2.6-M4",
+  "com.restfb" % "restfb" % "1.6.14",
   // Web Jars
   "org.webjars" %% "webjars-play" % "2.3.0",
   "org.webjars" % "angularjs" % "1.2.20",
