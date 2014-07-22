@@ -16,7 +16,13 @@ case class SearchResult(
 object SearchResult {
   // Convert from Last.fm format
   implicit val searchResultRead: Reads[SearchResult] = (
-    (__ \ "results" \ "artistmatches" \ "artist").read[Seq[Artist]] ~
+    (
+      // If it's a single object, convert to a sequence of one item
+      (__ \ "results" \ "artistmatches" \ "artist").read[Seq[Artist]] orElse
+      (__ \ "results" \ "artistmatches" \ "artist").read[Artist].map(Seq(_)) orElse
+      // Or there might be nothing at all
+      Reads.pure(Seq())
+    ) ~
     (__ \ "results" \ "@attr" \ "for").read[String]
   )(SearchResult.apply _)
 }

@@ -19,8 +19,8 @@ object EventList {
       // If it's a single object, convert to a sequence of one item
       (__ \ "events" \ "event").read[Seq[Event]] orElse 
       (__ \ "events" \ "event").read[Event].map(Seq(_)) orElse
-      // orElse there are no events at all, just #text
-      (__ \ "events" \ "#text").read[String].map(x => Seq())
+      // orElse there are no events at all
+      Reads.pure(Seq())
     ) ~
     // Either there are events orElse there are none, in which case attributes are not under "@attr"
     ((__ \ "events" \ "@attr").read[ListInfo] orElse (__ \ "events").read[ListInfo])
