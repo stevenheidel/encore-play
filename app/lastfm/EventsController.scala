@@ -23,21 +23,23 @@ object EventsController extends Controller {
   }
 
   def futureEvents(latitude: Double, longitude: Double, radius: Double, page: Int, limit: Int, date: String) = Action.async {
-    val result = GeoUpcoming.get(latitude, longitude, radius * Lastfm.maxDistance, Pagination(limit, page)).map { 
-      case (total, list) => Ok(Json.obj(
-        "total" -> total,
-        "events" -> Json.toJson(list.filter(_.isFuture(date)))
-      ))
-    }
+    GeoUpcoming.get(latitude, longitude, radius * Lastfm.maxDistance, Pagination(limit, page)).map { 
+      case (total, list) => {
+        // On getting the first page of results, precache the following pages so 'load more' goes faster
+        if (page == 1) {
+          val maxPage = Math.max(10, total/limit)
 
-    // On getting the first page of results, precache the following pages so 'load more' goes faster
-    if (page == 1) {
-      (2 to 10).map { x =>
-        GeoUpcoming.get(latitude, longitude, radius * Lastfm.maxDistance, Pagination(limit, x))
+          (2 to maxPage).map { x =>
+            GeoUpcoming.get(latitude, longitude, radius * Lastfm.maxDistance, Pagination(limit, x))
+          }
+        }
+
+        Ok(Json.obj(
+          "total" -> total,
+          "events" -> Json.toJson(list.filter(_.isFuture(date)))
+        ))
       }
     }
-
-    result
   }
 
   def singleEvent(event_id: Long) = Action.async {
