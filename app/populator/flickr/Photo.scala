@@ -26,7 +26,9 @@ case class Photo(
 object Photo {
   implicit val photoReads: Reads[Photo] = (
     (__ \ "title").read[String] ~
-    (__ \ "url_z").read[String] ~
+    // Try to get different sizes from largest to smallest
+    // See documentation on URLs here: https://secure.flickr.com/services/api/misc.urls.html
+    ((__ \ "url_z").read[String] orElse (__ \ "url_n").read[String] orElse (__ \ "url_m").read[String]) ~
     (__ \ "ownername").read[String]
   )(Photo.apply _)
 }

@@ -22,7 +22,7 @@ object PhotoSearch extends ExternalApiCache {
   val baseUrl: Uri = "https://secure.flickr.com/services/rest/" ? 
                         ("format" -> "json") & ("nojsoncallback" -> 1) &
                         ("api_key" -> key) & ("method" -> "flickr.photos.search") &
-                        ("extras" -> "owner_name,url_z,url_o")
+                        ("extras" -> "owner_name,url_m,url_n,url_z")
 
   def get(latitude: Double, longitude: Double, startTime: DateTime, endTime: DateTime): Future[Seq[Photo]] = {
     val params = Seq(
