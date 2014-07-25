@@ -14,7 +14,7 @@ import scala.concurrent.Future
 object TicketsUrl extends ExternalApiCache {
 
   def collection = db.collection[JSONCollection]("cache_seatgeek_url")
-  def expiry = 1.day
+  def expiry = 3.days
 
   val key = Play.current.configuration.getString("seatgeek.aid").get
 

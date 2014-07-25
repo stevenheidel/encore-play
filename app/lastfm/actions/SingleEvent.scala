@@ -14,7 +14,7 @@ import lastfm.responses.SingleResponse
 object SingleEvent extends ExternalApiCache {
 
   def collection = db.collection[JSONCollection]("cache_lastfm_event_info")
-  def expiry = 1.day
+  def expiry = 3.days
 
   def get(eventId: Long): Future[Event] = {
     ExternalApiCall.get[SingleResponse](UrlBuilder.event_getInfo(eventId)).map { r =>

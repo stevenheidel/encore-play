@@ -14,7 +14,7 @@ import utils.GeoPoint
 object TimeZone extends ExternalApiCache {
 
   def collection = db.collection[JSONCollection]("cache_google_timezone")
-  def expiry = 30.days // The world's government's don't change time zones that often
+  def expiry = 30.days // The world's governments don't change time zones that often
 
   // This value is ignored anyway, as dtcOffset isn't used. Currently set to January 29, 1991
   val timestamp = 665132523
