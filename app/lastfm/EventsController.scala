@@ -27,7 +27,7 @@ object EventsController extends Controller {
       case (total, list) => {
         // On getting the first page of results, precache the following pages so 'load more' goes faster
         if (page == 1) {
-          val maxPage = Math.max(10, total/limit)
+          val maxPage = Math.min(5, total/limit)
 
           (2 to maxPage).map { x =>
             GeoUpcoming.get(latitude, longitude, radius * Lastfm.maxDistance, Pagination(limit, x))
