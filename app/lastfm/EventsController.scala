@@ -6,19 +6,28 @@ import lastfm.actions._
 import play.api.libs.json._
 import scala.util.{Success, Failure}
 import lastfm.helpers.Pagination
+import lastfm.services.TodaysPastService
 
 object EventsController extends Controller {
   
-  // UNIMPLEMENTED
-  def pastEvents(latitude: Double, longitude: Double, radius: Double, date: String) = Action {
-    Ok(Json.obj("events" -> JsArray()))
+  def pastEvents(latitude: Double, longitude: Double, radius: Double, date: String) = Action.async {
+    TodaysPastService.getPast(latitude, longitude, date).map { events =>
+      Ok(Json.obj("events" -> events)) // Note that events is already a JSON response ready to be returned
+    }
   }
 
   def todaysEvents(latitude: Double, longitude: Double, radius: Double, date: String) = Action.async {
     GeoUpcoming.get(latitude, longitude, radius * Lastfm.maxDistance).map { 
-      case (total, list) => Ok(Json.obj(
-        "events" -> Json.toJson(list.filter(_.isToday(date)))
-      ))
+      case (total, list) => {
+        val events = list.filter(_.isToday(date))
+
+        // Save today's events for a day
+        TodaysPastService.putToday(events, latitude, longitude, date)
+
+        Ok(Json.obj(
+          "events" -> Json.toJson(events)
+        ))
+      }
     }
   }
 
